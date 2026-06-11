@@ -1,0 +1,24 @@
+# Flutter
+.dart_tool/
+.buildlog/
+.packages
+.pub/
+.pub-cache/
+.idea/
+android/app/debug.keystore
+ios/Flutter/Generated.xcconfig
+ios/Flutter/App.framework
+ios/Flutter/Flutter.framework
+ios/Flutter/Release.xcconfig
+ios/Flutter/Debug.xcconfig
+/build/
+# Android
+*.iml
+.gradle
+/local.properties
+# macOS
+/*.DS_Store
+# VS Code
+.vscode/
+# Misc
+coverage/
