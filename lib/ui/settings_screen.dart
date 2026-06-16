@@ -432,6 +432,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       onChanged: (val) {
                         if (val != null) {
                           ref.read(themePaletteProvider.notifier).setPalette(val);
+                          // Keep legacy static colors in sync
+                          AppColors.currentPalette = val;
                         }
                       },
                       items: const [

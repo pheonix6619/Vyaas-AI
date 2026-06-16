@@ -132,11 +132,11 @@ class ThemeNotifier extends StateNotifier<ThemeMode> {
 // ─── Prism Theme Provider ───────────────────────────────────────────────────
 final prismThemeProvider = Provider<PrismTheme>((ref) {
   final themeMode = ref.watch(themeModeProvider);
-  return themeMode == ThemeMode.light || 
-         (themeMode == ThemeMode.system && 
-          WidgetsBinding.instance.platformDispatcher.platformBrightness == Brightness.light)
-    ? PrismTheme.light()
-    : PrismTheme.dark();
+  final palette = ref.watch(themePaletteProvider);
+  final isLight = themeMode == ThemeMode.light ||
+      (themeMode == ThemeMode.system &&
+       WidgetsBinding.instance.platformDispatcher.platformBrightness == Brightness.light);
+  return PrismTheme.fromPalette(palette, isLight);
 });
 
 // ─── Font Scale ────────────────────────────────────────────────────────────────
