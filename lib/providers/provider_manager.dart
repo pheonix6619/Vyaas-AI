@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter/widgets.dart';
+import '../ui/theme_palette.dart';
 import 'ai_provider.dart';
 import 'gemini_provider.dart';
 import 'nvidia_provider.dart';
+import '../theme/prism_theme.dart';
 
 FlutterSecureStorage secureStorage = const FlutterSecureStorage();
 
@@ -87,27 +90,54 @@ final activeApiKeyExistsProvider = FutureProvider<bool>((ref) async {
 });
 
 // ─── Theme Mode ───────────────────────────────────────────────────────────────
-final themeModeProvider = StateNotifierProvider<ThemeModeNotifier, ThemeMode>((ref) {
-  return ThemeModeNotifier();
+final themeModeProvider = StateNotifierProvider<ThemeNotifier, ThemeMode>((ref) {
+  return ThemeNotifier();
 });
 
-class ThemeModeNotifier extends StateNotifier<ThemeMode> {
-  ThemeModeNotifier() : super(ThemeMode.dark) { _load(); }
-
-  Future<void> _load() async {
-    final v = await secureStorage.read(key: 'theme_mode');
-    if (v == 'light') state = ThemeMode.light;
-    else if (v == 'system') state = ThemeMode.system;
-    else state = ThemeMode.dark;
+class ThemeNotifier extends StateNotifier<ThemeMode> {
+  ThemeNotifier() : super(ThemeMode.system) {
+    _loadTheme();
   }
 
-  Future<void> setMode(ThemeMode mode) async {
+  Future<void> _loadTheme() async {
+    try {
+      final storedValue = await secureStorage.read(key: 'theme_mode');
+      if (storedValue == 'light') {
+        state = ThemeMode.light;
+      } else if (storedValue == 'dark') {
+        state = ThemeMode.dark;
+      } else {
+        state = ThemeMode.system;
+      }
+    } catch (_) {
+      state = ThemeMode.system;
+    }
+  }
+
+  Future<void> setTheme(ThemeMode mode) async {
     state = mode;
-    final key = mode == ThemeMode.light ? 'light'
-        : mode == ThemeMode.system ? 'system' : 'dark';
-    await secureStorage.write(key: 'theme_mode', value: key);
+    await secureStorage.write(
+      key: 'theme_mode', 
+      value: mode == ThemeMode.light ? 'light' : mode == ThemeMode.dark ? 'dark' : 'system'
+    );
+  }
+
+  void toggleTheme() {
+    final newMode = 
+      state == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
+    setTheme(newMode);
   }
 }
+
+// ─── Prism Theme Provider ───────────────────────────────────────────────────
+final prismThemeProvider = Provider<PrismTheme>((ref) {
+  final themeMode = ref.watch(themeModeProvider);
+  return themeMode == ThemeMode.light || 
+         (themeMode == ThemeMode.system && 
+          WidgetsBinding.instance.platformDispatcher.platformBrightness == Brightness.light)
+    ? PrismTheme.light()
+    : PrismTheme.dark();
+});
 
 // ─── Font Scale ────────────────────────────────────────────────────────────────
 final fontScaleProvider = StateNotifierProvider<FontScaleNotifier, double>((ref) {
@@ -129,7 +159,6 @@ class FontScaleNotifier extends StateNotifier<double> {
 }
 
 // ─── Theme Palette ────────────────────────────────────────────────────────────
-enum ThemePalette { midnightNavy, nordicForest }
 
 final themePaletteProvider = StateNotifierProvider<ThemePaletteNotifier, ThemePalette>((ref) {
   return ThemePaletteNotifier();

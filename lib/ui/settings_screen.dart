@@ -406,7 +406,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       onChanged: (val) {
                         if (val != null) {
                           setState(() => _activeTheme = val);
-                          ref.read(themeModeProvider.notifier).setMode(_stringToThemeMode(val));
+                          ref.read(themeModeProvider.notifier).setTheme(_stringToThemeMode(val));
                         }
                       },
                       items: ['System', 'Light', 'Dark'].map((String mode) {
