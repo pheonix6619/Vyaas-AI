@@ -12,6 +12,7 @@ import '../providers/provider_manager.dart';
 import '../models/resume.dart';
 import '../services/resume_ai_service.dart';
 import '../database/providers.dart';
+import '../utils/pdf_font_scaler.dart';
 
 class ResumeHubScreen extends ConsumerStatefulWidget {
   const ResumeHubScreen({super.key});
@@ -42,6 +43,7 @@ class _ResumeHubScreenState extends ConsumerState<ResumeHubScreen> with SingleTi
   List<String> _missingKeywords = ['Kubernetes', 'CI/CD Pipelines', 'Drift DB'];
   String _suggestions = 'Suggestions will appear here after optimization.';
   String _selectedFont = 'Times New Roman';
+  bool _onePageRule = false;
 
   // Local state buffers for Resume Form to ensure confirm-before-save
   List<WorkExperience> _localExperiences = [];
@@ -630,7 +632,123 @@ $text
     if (trimmed.startsWith(RegExp(r'https?://', caseSensitive: false))) {
       return trimmed;
     }
-    return 'https://$trimmed';
+        return 'https://$trimmed';
+  }
+
+  Map<String, double> _calculateFontSizes({
+    required bool onePageRule,
+    required List<WorkExperience> experiences,
+    required List<Education> education,
+    required List<Project> projects,
+    required List<Certification> certs,
+    required List<String> achievements,
+    required Map<String, List<String>> filteredSkills,
+    required bool hasObjective,
+  }) {
+    if (!onePageRule) {
+      return {
+        'heading': 11.0,
+        'subHeading': 9.5,
+        'body': 9.0,
+        'small': 8.5,
+        'tiny': 8.0,
+        'skillCategory': 9.0,
+        'skillItem': 8.0,
+      };
+    }
+
+    // Estimate total lines
+    int estimatedLines = 0;
+    
+    // Header (name, contact) - ~4 lines
+    estimatedLines += 5;
+    
+    if (hasObjective) {
+      estimatedLines += 3; // heading + divider + text
+    }
+    
+    // Skills
+    if (filteredSkills.isNotEmpty) {
+      estimatedLines += 2; // heading + divider
+      for (final skills in filteredSkills.values) {
+        estimatedLines += 1 + (skills.length * 0.5).ceil();
+      }
+    }
+    
+    // Experience
+    if (experiences.isNotEmpty) {
+      estimatedLines += 2; // heading + divider
+      for (final exp in experiences) {
+        estimatedLines += 2; // header + duration
+        if (exp.description.trim().isNotEmpty) {
+          estimatedLines += (exp.description.length / 65).ceil();
+        }
+      }
+    }
+    
+    // Education
+    if (education.isNotEmpty) {
+      estimatedLines += 2; // heading + divider
+      estimatedLines += education.length * 2;
+    }
+    
+    // Projects
+    if (projects.isNotEmpty) {
+      estimatedLines += 2; // heading + divider
+      for (final p in projects) {
+        estimatedLines += 1; // title
+        estimatedLines += (p.description.length / 65).ceil();
+      }
+    }
+    
+    // Certifications
+    if (certs.isNotEmpty) {
+      estimatedLines += 2; // heading + divider
+      estimatedLines += certs.length;
+    }
+    
+    // Achievements
+    if (achievements.isNotEmpty) {
+      estimatedLines += 2; // heading + divider
+      estimatedLines += achievements.length;
+    }
+    
+    // Section spacing
+    estimatedLines += _sectionOrder.length * 1.5.ceil();
+
+    // A4 usable height: ~752 points with margins, line height ~12-14 points
+    // Max lines per page ≈ 55-60
+    const maxLinesPerPage = 55;
+    
+    if (estimatedLines <= maxLinesPerPage) {
+      return {
+        'heading': 11.0,
+        'subHeading': 9.5,
+        'body': 9.0,
+        'small': 8.5,
+        'tiny': 8.0,
+        'skillCategory': 9.0,
+        'skillItem': 8.0,
+      };
+    }
+    
+    // Calculate scale factor
+    final scaleFactor = maxLinesPerPage / estimatedLines;
+    
+    // Apply scaling with minimum limits
+    double scale(double base) {
+      return (base * scaleFactor).clamp(8.0, 11.0);
+    }
+    
+    return {
+      'heading': scale(11.0),
+      'subHeading': scale(9.5),
+      'body': scale(9.0),
+      'small': scale(8.5),
+      'tiny': scale(8.0),
+      'skillCategory': scale(9.0),
+      'skillItem': scale(8.0),
+    };
   }
 
   Future<void> _exportPdfFile(Resume resume) async {
@@ -672,14 +790,8 @@ $text
         boldItalicFont = pw.Font.timesBoldItalic();
         break;
     }
-    
-    final pdfTheme = pw.ThemeData.withFont(
-      base: baseFont,
-      bold: boldFont,
-      italic: italicFont,
-      boldItalic: boldItalicFont,
-    );
-    
+
+    // Calculate dynamic font sizes for one-page rule
     final List<WorkExperience> experiences = (resume.experience ?? []).where((exp) =>
       exp.company.trim().isNotEmpty ||
       exp.title.trim().isNotEmpty ||
@@ -723,6 +835,25 @@ $text
       )
     );
 
+    // Dynamic font sizing for one-page rule
+    final fontSizes = _calculateFontSizes(
+      onePageRule: _onePageRule,
+      experiences: experiences,
+      education: education,
+      projects: projects,
+      certs: certs,
+      achievements: achievements,
+      filteredSkills: filteredSkills,
+      hasObjective: resume.aiObjective != null && resume.aiObjective!.trim().isNotEmpty,
+    );
+
+    final pdfTheme = pw.ThemeData.withFont(
+      base: baseFont,
+      bold: boldFont,
+      italic: italicFont,
+      boldItalic: boldItalicFont,
+    );
+
     pdf.addPage(
       pw.MultiPage(
         theme: pdfTheme,
@@ -743,10 +874,10 @@ $text
                     child: pw.Column(
                       crossAxisAlignment: pw.CrossAxisAlignment.start,
                       children: [
-                        pw.Text('OBJECTIVE', style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold)),
+                        pw.Text('OBJECTIVE', style: pw.TextStyle(fontSize: fontSizes['heading']!, fontWeight: pw.FontWeight.bold)),
                         pw.Divider(height: 1),
                         pw.SizedBox(height: 3),
-                        pw.Text(_cleanPdfText(resume.aiObjective!.trim()), style: const pw.TextStyle(fontSize: 9), textAlign: pw.TextAlign.justify),
+                        pw.Text(_cleanPdfText(resume.aiObjective!.trim()), style: pw.TextStyle(fontSize: fontSizes['body']!), textAlign: pw.TextAlign.justify),
                         pw.SizedBox(height: 8),
                       ],
                     ),
@@ -760,10 +891,10 @@ $text
                     child: pw.Column(
                       crossAxisAlignment: pw.CrossAxisAlignment.start,
                       children: [
-                        pw.Text('SKILLS', style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold)),
+                        pw.Text('SKILLS', style: pw.TextStyle(fontSize: fontSizes['heading']!, fontWeight: pw.FontWeight.bold)),
                         pw.Divider(height: 1),
                         pw.SizedBox(height: 3),
-                        ..._buildPdfSkills(filteredSkills, baseFont, boldFont),
+                        ..._buildPdfSkills(filteredSkills, baseFont, boldFont, fontSizes),
                         pw.SizedBox(height: 8),
                       ],
                     ),
@@ -777,7 +908,7 @@ $text
                     child: pw.Column(
                       crossAxisAlignment: pw.CrossAxisAlignment.start,
                       children: [
-                        pw.Text('WORK EXPERIENCE', style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold)),
+                        pw.Text('WORK EXPERIENCE', style: pw.TextStyle(fontSize: fontSizes['heading']!, fontWeight: pw.FontWeight.bold)),
                         pw.Divider(height: 1),
                         pw.SizedBox(height: 4),
                         ...experiences.map((exp) {
@@ -795,14 +926,14 @@ $text
                                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                                   children: [
                                     if (headerText.isNotEmpty)
-                                      pw.Text(headerText, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
+                                      pw.Text(headerText, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: fontSizes['subHeading']!)),
                                     if (exp.duration.trim().isNotEmpty)
-                                      pw.Text(_cleanPdfText(exp.duration.trim()), style: const pw.TextStyle(fontSize: 8.5)),
+                                      pw.Text(_cleanPdfText(exp.duration.trim()), style: pw.TextStyle(fontSize: fontSizes['small']!)),
                                   ],
                                 ),
                                 if (exp.description.trim().isNotEmpty) ...[
                                   pw.SizedBox(height: 1.5),
-                                  pw.Text(_cleanPdfText(exp.description.trim()), style: const pw.TextStyle(fontSize: 8.5), textAlign: pw.TextAlign.justify),
+                                  pw.Text(_cleanPdfText(exp.description.trim()), style: pw.TextStyle(fontSize: fontSizes['small']!), textAlign: pw.TextAlign.justify),
                                 ],
                               ],
                             ),
@@ -821,7 +952,7 @@ $text
                     child: pw.Column(
                       crossAxisAlignment: pw.CrossAxisAlignment.start,
                       children: [
-                        pw.Text('EDUCATION', style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold)),
+                        pw.Text('EDUCATION', style: pw.TextStyle(fontSize: fontSizes['heading']!, fontWeight: pw.FontWeight.bold)),
                         pw.Divider(height: 1),
                         pw.SizedBox(height: 4),
                         ...education.map((edu) {
@@ -836,14 +967,14 @@ $text
                                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                                     children: [
                                       if (edu.school.trim().isNotEmpty)
-                                        pw.Text(_cleanPdfText(edu.school.trim()), style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
+                                        pw.Text(_cleanPdfText(edu.school.trim()), style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: fontSizes['subHeading']!)),
                                       if (edu.degree.trim().isNotEmpty)
-                                        pw.Text(_cleanPdfText(edu.degree.trim()), style: const pw.TextStyle(fontSize: 8.5)),
+                                        pw.Text(_cleanPdfText(edu.degree.trim()), style: pw.TextStyle(fontSize: fontSizes['small']!)),
                                     ],
                                   ),
                                 ),
                                 if (edu.duration.trim().isNotEmpty)
-                                  pw.Text(_cleanPdfText(edu.duration.trim()), style: const pw.TextStyle(fontSize: 8.5)),
+                                  pw.Text(_cleanPdfText(edu.duration.trim()), style: pw.TextStyle(fontSize: fontSizes['small']!)),
                               ],
                             ),
                           );
@@ -861,7 +992,7 @@ $text
                     child: pw.Column(
                       crossAxisAlignment: pw.CrossAxisAlignment.start,
                       children: [
-                        pw.Text('PROJECTS', style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold)),
+                        pw.Text('PROJECTS', style: pw.TextStyle(fontSize: fontSizes['heading']!, fontWeight: pw.FontWeight.bold)),
                         pw.Divider(height: 1),
                         pw.SizedBox(height: 4),
                         ...projects.map((p) {
@@ -883,9 +1014,9 @@ $text
                                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                                   children: [
                                     if (titleText.isNotEmpty)
-                                      pw.Text(titleText, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
+                                      pw.Text(titleText, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: fontSizes['subHeading']!)),
                                     if (p.year.trim().isNotEmpty)
-                                      pw.Text(_cleanPdfText(p.year.trim()), style: const pw.TextStyle(fontSize: 8.5)),
+                                      pw.Text(_cleanPdfText(p.year.trim()), style: pw.TextStyle(fontSize: fontSizes['small']!)),
                                   ],
                                 ),
                                 if (displayedBullets.isNotEmpty) ...[
@@ -905,7 +1036,7 @@ $text
                                           ),
                                         ),
                                         pw.Expanded(
-                                          child: pw.Text(_cleanPdfText(bullet), style: const pw.TextStyle(fontSize: 8.5), textAlign: pw.TextAlign.justify),
+                                          child: pw.Text(_cleanPdfText(bullet), style: pw.TextStyle(fontSize: fontSizes['small']!), textAlign: pw.TextAlign.justify),
                                         ),
                                       ],
                                     ),
@@ -928,7 +1059,7 @@ $text
                     child: pw.Column(
                       crossAxisAlignment: pw.CrossAxisAlignment.start,
                       children: [
-                        pw.Text('CERTIFICATIONS', style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold)),
+                        pw.Text('CERTIFICATIONS', style: pw.TextStyle(fontSize: fontSizes['heading']!, fontWeight: pw.FontWeight.bold)),
                         pw.Divider(height: 1),
                         pw.SizedBox(height: 4),
                         ...certs.map((c) {
@@ -948,14 +1079,14 @@ $text
                                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                                     children: [
                                       if (c.name.trim().isNotEmpty)
-                                        pw.Text(_cleanPdfText(c.name.trim()), style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
+                                        pw.Text(_cleanPdfText(c.name.trim()), style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: fontSizes['subHeading']!)),
                                       if (issuerText.isNotEmpty)
-                                        pw.Text(issuerText, style: const pw.TextStyle(fontSize: 8.5)),
+                                        pw.Text(issuerText, style: pw.TextStyle(fontSize: fontSizes['small']!)),
                                     ],
                                   ),
                                 ),
                                 if (c.year.trim().isNotEmpty)
-                                  pw.Text(_cleanPdfText(c.year.trim()), style: const pw.TextStyle(fontSize: 8.5)),
+                                  pw.Text(_cleanPdfText(c.year.trim()), style: pw.TextStyle(fontSize: fontSizes['small']!)),
                               ],
                             ),
                           );
@@ -973,7 +1104,7 @@ $text
                     child: pw.Column(
                       crossAxisAlignment: pw.CrossAxisAlignment.start,
                       children: [
-                        pw.Text('ACHIEVEMENTS', style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold)),
+                        pw.Text('ACHIEVEMENTS', style: pw.TextStyle(fontSize: fontSizes['heading']!, fontWeight: pw.FontWeight.bold)),
                         pw.Divider(height: 1),
                         pw.SizedBox(height: 4),
                         ...achievements.map((a) {
@@ -992,7 +1123,7 @@ $text
                                   ),
                                 ),
                                 pw.Expanded(
-                                  child: pw.Text(_cleanPdfText(a), style: const pw.TextStyle(fontSize: 8.5), textAlign: pw.TextAlign.justify),
+                                  child: pw.Text(_cleanPdfText(a), style: pw.TextStyle(fontSize: fontSizes['small']!), textAlign: pw.TextAlign.justify),
                                 ),
                               ],
                             ),
@@ -1216,7 +1347,7 @@ $text
       );
   }
 
-  List<pw.Widget> _buildPdfSkills(Map<String, List<String>> skills, pw.Font baseFont, pw.Font boldFont) {
+  List<pw.Widget> _buildPdfSkills(Map<String, List<String>> skills, pw.Font baseFont, pw.Font boldFont, Map<String, double> fontSizes) {
     return skills.entries.map((entry) {
       final keyText = _cleanPdfText(entry.key.trim());
       final valueText = _cleanPdfText(entry.value.map((v) => v.trim()).where((v) => v.isNotEmpty).join(', '));
@@ -1240,7 +1371,7 @@ $text
                 softWrap: false,
                 overflow: pw.TextOverflow.clip,
                 text: pw.TextSpan(
-                  style: pw.TextStyle(font: baseFont, fontSize: 9),
+                  style: pw.TextStyle(font: baseFont, fontSize: fontSizes['skillCategory']!),
                   children: [
                     pw.TextSpan(text: keyText, style: pw.TextStyle(font: boldFont, fontWeight: pw.FontWeight.bold)),
                     const pw.TextSpan(text: ' : '),
@@ -3065,8 +3196,12 @@ $text
                   const Text('One Page Rule', style: TextStyle(fontSize: 11)),
                   const SizedBox(width: 4),
                   Switch(
-                    value: true,
-                    onChanged: (_) {},
+                    value: _onePageRule,
+                    onChanged: (val) {
+                      setState(() {
+                        _onePageRule = val;
+                      });
+                    },
                     activeThumbColor: AppColors.accentIndigo,
                   ),
                 ],
