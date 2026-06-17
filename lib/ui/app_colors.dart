@@ -11,6 +11,11 @@ class AppColors {
         return const Color(0xFF0B0F0C); // Deep near-black forest green
       case ThemePalette.midnightNavy:
         return const Color(0xFF090B11); // Deep midnight space navy
+      case ThemePalette.sunsetOrange:
+      case ThemePalette.lavenderPurple:
+      case ThemePalette.oceanTeal:
+      default:
+        return const Color(0xFF090B11);
     }
   }
 
@@ -20,6 +25,11 @@ class AppColors {
         return const Color(0xFF161D18); // Dark spruce/slate green
       case ThemePalette.midnightNavy:
         return const Color(0xFF131824); // Rich dark navy
+      case ThemePalette.sunsetOrange:
+      case ThemePalette.lavenderPurple:
+      case ThemePalette.oceanTeal:
+      default:
+        return const Color(0xFF131824);
     }
   }
 
@@ -29,6 +39,14 @@ class AppColors {
         return const Color(0xFF10B981); // Fresh mint green
       case ThemePalette.midnightNavy:
         return const Color(0xFF2563EB); // Intense cobalt blue
+      case ThemePalette.sunsetOrange:
+        return const Color(0xFFFF6B35);
+      case ThemePalette.lavenderPurple:
+        return const Color(0xFF9B59B6);
+      case ThemePalette.oceanTeal:
+        return const Color(0xFF009688);
+      default:
+        return const Color(0xFF2563EB);
     }
   }
 
@@ -38,6 +56,14 @@ class AppColors {
         return const Color(0xFF34D399); // Soft sage green
       case ThemePalette.midnightNavy:
         return const Color(0xFFF43F5E); // Vibrant coral red
+      case ThemePalette.sunsetOrange:
+        return const Color(0xFFFF3B30);
+      case ThemePalette.lavenderPurple:
+        return const Color(0xFFE91E63);
+      case ThemePalette.oceanTeal:
+        return const Color(0xFF00BCD4);
+      default:
+        return const Color(0xFFF43F5E);
     }
   }
   

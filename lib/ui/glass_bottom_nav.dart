@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:ui';
 import '../theme/prism_theme.dart';
 import 'glass_components.dart';
+import 'package:flutter/services.dart';
 
 class GlassBottomNavigationBar extends StatelessWidget {
   final int currentIndex;
@@ -33,7 +34,7 @@ class GlassBottomNavigationBar extends StatelessWidget {
           children: [
             // Circular pointer (indicator) that animates to selected item
             AnimatedPositioned(
-              duration: const Duration(milliseconds: 300),
+              duration: const Duration(milliseconds: 250),
               curve: Curves.easeOutCubic,
               left: (MediaQuery.of(context).size.width - 48) / itemCount * currentIndex + 12,
               bottom: 56, // position just above the bar
@@ -60,7 +61,10 @@ class GlassBottomNavigationBar extends StatelessWidget {
                 final isSelected = index == currentIndex;
                 return Expanded(
                   child: InkWell(
-                    onTap: () => onTap(index),
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      onTap(index);
+                    },
                     borderRadius: BorderRadius.circular(16),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8),

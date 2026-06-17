@@ -445,6 +445,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           value: ThemePalette.nordicForest,
                           child: Text('Nordic Forest & Sage'),
                         ),
+                        DropdownMenuItem<ThemePalette>(
+                          value: ThemePalette.sunsetOrange,
+                          child: Text('Sunset Orange & Gold'),
+                        ),
+                        DropdownMenuItem<ThemePalette>(
+                          value: ThemePalette.lavenderPurple,
+                          child: Text('Lavender Purple & Pink'),
+                        ),
+                        DropdownMenuItem<ThemePalette>(
+                          value: ThemePalette.oceanTeal,
+                          child: Text('Ocean Teal & Cyan'),
+                        ),
                       ],
                     ),
                   ),

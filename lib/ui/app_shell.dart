@@ -46,6 +46,7 @@ class _AppShellState extends ConsumerState<AppShell> {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
+      extendBody: true,
       body: Stack(
         children: [
           // Full-screen gradient background
@@ -261,50 +262,53 @@ class _AppShellState extends ConsumerState<AppShell> {
               Expanded(child: _screens[selectedIndex]),
             ],
           ),
+          // Floating bottom navigation for mobile
+          if (!isDesktop)
+            Positioned(
+              left: 16,
+              right: 16,
+              bottom: 16,
+              child: GlassBottomNavigationBar(
+                currentIndex: selectedIndex > 3 ? 4 : selectedIndex,
+                onTap: (index) {
+                  if (index == 4) {
+                    // Settings tab on mobile defaults to Settings Providers screen
+                    ref.read(appShellIndexProvider.notifier).state = 4;
+                  } else {
+                    ref.read(appShellIndexProvider.notifier).state = index;
+                  }
+                },
+                items: const [
+                  GlassBottomNavItem(
+                    icon: Icons.dashboard_outlined,
+                    activeIcon: Icons.dashboard_rounded,
+                    label: 'Home',
+                  ),
+                  GlassBottomNavItem(
+                    icon: Icons.chat_bubble_outline_rounded,
+                    activeIcon: Icons.chat_bubble_rounded,
+                    label: 'Chat',
+                  ),
+                  GlassBottomNavItem(
+                    icon: Icons.description_outlined,
+                    activeIcon: Icons.description_rounded,
+                    label: 'Resumes',
+                  ),
+                  GlassBottomNavItem(
+                    icon: Icons.widgets_outlined,
+                    activeIcon: Icons.widgets_rounded,
+                    label: 'Templates',
+                  ),
+                  GlassBottomNavItem(
+                    icon: Icons.settings_outlined,
+                    activeIcon: Icons.settings_rounded,
+                    label: 'Settings',
+                  ),
+                ],
+              ),
+            ),
         ],
       ),
-      
-      // Bottom navigation menu for mobile devices
-      bottomNavigationBar: !isDesktop
-          ? GlassBottomNavigationBar(
-              currentIndex: selectedIndex > 3 ? 4 : selectedIndex,
-              onTap: (index) {
-                if (index == 4) {
-                  // Settings tab on mobile defaults to Settings Providers screen
-                  ref.read(appShellIndexProvider.notifier).state = 4;
-                } else {
-                  ref.read(appShellIndexProvider.notifier).state = index;
-                }
-              },
-              items: const [
-                GlassBottomNavItem(
-                  icon: Icons.dashboard_outlined,
-                  activeIcon: Icons.dashboard_rounded,
-                  label: 'Home',
-                ),
-                GlassBottomNavItem(
-                  icon: Icons.chat_bubble_outline_rounded,
-                  activeIcon: Icons.chat_bubble_rounded,
-                  label: 'Chat',
-                ),
-                GlassBottomNavItem(
-                  icon: Icons.description_outlined,
-                  activeIcon: Icons.description_rounded,
-                  label: 'Resumes',
-                ),
-                GlassBottomNavItem(
-                  icon: Icons.widgets_outlined,
-                  activeIcon: Icons.widgets_rounded,
-                  label: 'Templates',
-                ),
-                GlassBottomNavItem(
-                  icon: Icons.settings_outlined,
-                  activeIcon: Icons.settings_rounded,
-                  label: 'Settings',
-                ),
-              ],
-            )
-          : null,
     );
   }
 

@@ -193,7 +193,7 @@ $jdText
 
 Perform two tasks:
 1. ATS Analysis: Compute a matching ATS score (0-100), identify missing key terms/keywords, and list detailed suggestions.
-2. Resume Optimization: Update and tailor the resume fields to align with the Job Description. Keep existing experiences/projects but rewrite their descriptions/titles to highlight relevant technologies/skills. Update the professional objective and skills to integrate missing keywords under appropriate categories.
+2. Resume Optimization: Update and tailor the resume fields to align with the Job Description. Keep existing experiences and projects exactly as provided; only rewrite their descriptions and titles to highlight relevant technologies/skills. Do NOT add new experiences, projects, or skills that were not present in the original resume. Update the professional objective and integrate missing keywords into existing skill categories only; do not create new skill categories.
 
 CRITICAL SKILLS OPTIMIZATION INSTRUCTION:
 In the "skills" section, to ensure skill category lines fit within the resume constraints, actively use compact or short forms (e.g. "RAG" instead of "Retrieval-Augmented Generation", "CI/CD" instead of "Continuous Integration/Continuous Deployment", "API" instead of "Application Programming Interface", etc.). If no standard short/compact form is available, keep the name as is.
