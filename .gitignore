@@ -22,3 +22,11 @@ ios/Flutter/Debug.xcconfig
 .vscode/
 # Misc
 coverage/
+# Generated artifacts ignore
+android/app/build/
+android/app/src/debug/
+android/app/src/profile/
+android/.kotlin/
+VYassAI-release.apk
+lib/database/app_database.g.dart
+ios/Runner.xcworkspace/
