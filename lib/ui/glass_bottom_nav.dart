@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:ui';
 import '../theme/prism_theme.dart';
 import 'glass_components.dart';
 import 'package:flutter/services.dart';
@@ -22,79 +21,115 @@ class GlassBottomNavigationBar extends StatelessWidget {
     final itemCount = items.length;
 
     return GlassCard(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      borderRadius: 24,
-      blurSigma: 20,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      borderRadius: 28,
+      blurSigma: 24,
       borderWidth: 0.5,
       borderColorOverride: theme.glassBorder,
       child: SizedBox(
-        height: 56,
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            // Circular pointer (indicator) that animates to selected item
-            AnimatedPositioned(
-              duration: const Duration(milliseconds: 250),
-              curve: Curves.easeOutCubic,
-              left: (MediaQuery.of(context).size.width - 48) / itemCount * currentIndex + 12,
-              bottom: 56, // position just above the bar
-              child: GlassCard(
-                padding: EdgeInsets.zero,
-                borderRadius: 24,
-                blurSigma: 12,
-                borderWidth: 0,
-                child: Container(
-                  width: 48,
-                  height: 48,
+        height: 68,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: List.generate(itemCount, (index) {
+            final item = items[index];
+            final isSelected = index == currentIndex;
+            return Expanded(
+              child: GestureDetector(
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  onTap(index);
+                },
+                behavior: HitTestBehavior.opaque,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 280),
+                  curve: Curves.easeOutCubic,
+                  margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                   decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: theme.accentIndigo.withOpacity(0.2),
+                    color: isSelected
+                        ? theme.accentIndigo.withValues(alpha: theme.isDark ? 0.22 : 0.14)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(
+                      color: isSelected
+                          ? theme.accentIndigo.withValues(alpha: 0.35)
+                          : Colors.transparent,
+                      width: 1.0,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: isSelected
+                            ? theme.accentIndigo.withValues(alpha: 0.15)
+                            : Colors.transparent,
+                        blurRadius: 12,
+                        spreadRadius: 0,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        AnimatedScale(
+                          scale: isSelected ? 1.15 : 1.0,
+                          duration: const Duration(milliseconds: 250),
+                          child: Icon(
+                            isSelected ? item.activeIcon : item.icon,
+                            color: isSelected
+                                ? theme.accentIndigo
+                                : theme.textSecondary,
+                            size: 22,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          item.label,
+                          style: TextStyle(
+                            color: isSelected
+                                ? theme.accentIndigo
+                                : theme.textSecondary,
+                            fontSize: 10,
+                            fontWeight:
+                                isSelected ? FontWeight.w700 : FontWeight.w400,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        // Active dot indicator
+                        AnimatedOpacity(
+                          opacity: isSelected ? 1.0 : 0.0,
+                          duration: const Duration(milliseconds: 250),
+                          curve: Curves.easeInOut,
+                          child: AnimatedScale(
+                            scale: isSelected ? 1.0 : 0.0,
+                            duration: const Duration(milliseconds: 250),
+                            curve: Curves.easeOutBack,
+                            child: Container(
+                              margin: const EdgeInsets.only(top: 2),
+                              width: 5,
+                              height: 5,
+                              decoration: BoxDecoration(
+                                color: theme.accentIndigo,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: theme.accentIndigo.withValues(alpha: 0.5),
+                                    blurRadius: 6,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-            // Navigation items
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: List.generate(itemCount, (index) {
-                final item = items[index];
-                final isSelected = index == currentIndex;
-                return Expanded(
-                  child: InkWell(
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      onTap(index);
-                    },
-                    borderRadius: BorderRadius.circular(16),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            isSelected ? item.activeIcon : item.icon,
-                            color: isSelected ? theme.accentIndigo : theme.textSecondary,
-                            size: 24,
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            item.label,
-                            style: TextStyle(
-                              color: isSelected ? theme.textPrimary : theme.textSecondary,
-                              fontSize: 10,
-                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              }),
-            ),
-          ],
+            );
+          }),
         ),
       ),
     );

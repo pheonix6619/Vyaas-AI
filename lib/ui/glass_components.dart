@@ -1,9 +1,12 @@
 // lib/ui/glass_components.dart
 import 'package:flutter/material.dart';
 import 'dart:ui';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../theme/prism_theme.dart';
+import '../providers/provider_manager.dart';
+import 'app_colors.dart';
 
-class GlassCard extends StatelessWidget {
+class GlassCard extends ConsumerWidget {
   final Widget child;
   final EdgeInsetsGeometry? padding;
   final double blurSigma;
@@ -22,8 +25,10 @@ class GlassCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(prismThemeProvider);
     final theme = context.prismTheme;
+    final glassColor = AppColors.glassTileColor;
     return Container(
       decoration: BoxDecoration(
         border: Border.all(
@@ -39,7 +44,7 @@ class GlassCard extends StatelessWidget {
           child: Container(
             padding: padding ?? const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: theme.glassBase,
+              color: glassColor,
             ),
             child: child,
           ),
@@ -84,7 +89,7 @@ class GlassButton extends StatelessWidget {
         style: TextButton.styleFrom(
           foregroundColor: Colors.white,
           padding: padding,
-          backgroundColor: bgColor.withOpacity(0.2),
+          backgroundColor: bgColor.withValues(alpha: 0.2),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(borderRadius),
           ),

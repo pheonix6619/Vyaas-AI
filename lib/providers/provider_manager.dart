@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:flutter/widgets.dart';
 import '../ui/theme_palette.dart';
+import '../ui/app_colors.dart';
 import 'ai_provider.dart';
 import 'gemini_provider.dart';
 import 'nvidia_provider.dart';
@@ -133,10 +133,20 @@ class ThemeNotifier extends StateNotifier<ThemeMode> {
 final prismThemeProvider = Provider<PrismTheme>((ref) {
   final themeMode = ref.watch(themeModeProvider);
   final palette = ref.watch(themePaletteProvider);
+  final glassTileStyle = ref.watch(glassTileStyleProvider);
+  final glassOpacity = ref.watch(glassOpacityProvider);
   final isLight = themeMode == ThemeMode.light ||
       (themeMode == ThemeMode.system &&
        WidgetsBinding.instance.platformDispatcher.platformBrightness == Brightness.light);
-  return PrismTheme.fromPalette(palette, isLight);
+  final isDark = !isLight;
+
+  // Keep legacy static AppColors in sync with reactive providers
+  AppColors.isDark = isDark;
+  AppColors.currentPalette = palette;
+  AppColors.glassTileStyle = glassTileStyle;
+  AppColors.glassOpacity = glassOpacity;
+
+  return PrismTheme.fromPalette(palette, isDark);
 });
 
 // ─── Font Scale ────────────────────────────────────────────────────────────────
@@ -169,16 +179,66 @@ class ThemePaletteNotifier extends StateNotifier<ThemePalette> {
 
   Future<void> _load() async {
     final v = await secureStorage.read(key: 'theme_palette');
-    if (v == 'nordicForest') {
-      state = ThemePalette.nordicForest;
-    } else {
-      state = ThemePalette.midnightNavy;
+    if (v != null) {
+      try {
+        state = ThemePalette.values.firstWhere((p) => p.name == v);
+      } catch (_) {
+        state = ThemePalette.midnightNavy;
+      }
     }
   }
 
   Future<void> setPalette(ThemePalette palette) async {
     state = palette;
     await secureStorage.write(key: 'theme_palette', value: palette.name);
+  }
+}
+
+// ─── Glass Tile Style ─────────────────────────────────────────────────────────
+
+final glassTileStyleProvider = StateNotifierProvider<GlassTileStyleNotifier, GlassTileStyle>((ref) {
+  return GlassTileStyleNotifier();
+});
+
+class GlassTileStyleNotifier extends StateNotifier<GlassTileStyle> {
+  GlassTileStyleNotifier() : super(GlassTileStyle.defaultTheme) { _load(); }
+
+  Future<void> _load() async {
+    final v = await secureStorage.read(key: 'glass_tile_style');
+    if (v != null) {
+      try {
+        state = GlassTileStyle.values.firstWhere((s) => s.name == v);
+      } catch (_) {
+        state = GlassTileStyle.defaultTheme;
+      }
+    }
+  }
+
+  Future<void> setStyle(GlassTileStyle style) async {
+    state = style;
+    await secureStorage.write(key: 'glass_tile_style', value: style.name);
+  }
+}
+
+// ─── Glass Opacity ──────────────────────────────────────────────────────────
+
+final glassOpacityProvider = StateNotifierProvider<GlassOpacityNotifier, double>((ref) {
+  return GlassOpacityNotifier();
+});
+
+class GlassOpacityNotifier extends StateNotifier<double> {
+  GlassOpacityNotifier() : super(0.6) { _load(); }
+
+  Future<void> _load() async {
+    final v = await secureStorage.read(key: 'glass_opacity');
+    if (v != null) {
+      state = double.tryParse(v) ?? 0.6;
+    }
+  }
+
+  Future<void> setOpacity(double opacity) async {
+    state = opacity;
+    await secureStorage.write(key: 'glass_opacity', value: opacity.toString());
   }
 }
 

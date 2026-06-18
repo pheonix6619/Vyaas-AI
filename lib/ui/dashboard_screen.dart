@@ -27,7 +27,7 @@ class DashboardScreen extends ConsumerWidget {
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 100.0),
           child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -57,9 +57,9 @@ class DashboardScreen extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: AppColors.successGreen.withOpacity(0.15),
+                    color: AppColors.successGreen.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: AppColors.successGreen.withOpacity(0.3)),
+                    border: Border.all(color: AppColors.successGreen.withValues(alpha: 0.3)),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -164,9 +164,9 @@ class DashboardScreen extends ConsumerWidget {
                   const SizedBox(height: 8),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
+                    children: [
                       Flexible(child: Text('Scheduler Load: Low', style: TextStyle(fontSize: 12, color: AppColors.textSecondary), overflow: TextOverflow.ellipsis)),
-                      SizedBox(width: 8),
+                      const SizedBox(width: 8),
                       Flexible(child: Text('Cost Saved: \$0.00 (Local)', style: TextStyle(fontSize: 12, color: AppColors.textSecondary), overflow: TextOverflow.ellipsis)),
                     ],
                   ),
@@ -188,8 +188,8 @@ class DashboardScreen extends ConsumerWidget {
                     chatsAsync.when(
                       data: (chats) {
                         if (chats.isEmpty) {
-                          return const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 8.0),
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
                             child: Text(
                               'No recent chats',
                               style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
@@ -227,8 +227,8 @@ class DashboardScreen extends ConsumerWidget {
                     resumesAsync.when(
                       data: (resumes) {
                         if (resumes.isEmpty) {
-                          return const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 8.0),
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
                             child: Text(
                               'No recent resumes',
                               style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
@@ -299,7 +299,7 @@ class DashboardScreen extends ConsumerWidget {
       child: Container(
         padding: const EdgeInsets.all(16.0),
         decoration: BoxDecoration(
-          color: AppColors.slateCard.withOpacity(0.6),
+          color: AppColors.slateCard.withValues(alpha: 0.6),
           borderRadius: BorderRadius.circular(16.0),
           border: Border.all(color: AppColors.borderTransparent),
         ),
@@ -308,7 +308,7 @@ class DashboardScreen extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.15),
+                color: color.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(icon, color: color, size: 24),
@@ -321,7 +321,7 @@ class DashboardScreen extends ConsumerWidget {
                 children: [
                   Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                   const SizedBox(height: 4),
-                  Text(subtitle, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12), maxLines: 2),
+                  Text(subtitle, style: TextStyle(color: AppColors.textSecondary, fontSize: 12), maxLines: 2),
                 ],
               ),
             ),
@@ -336,7 +336,7 @@ class DashboardScreen extends ConsumerWidget {
       contentPadding: EdgeInsets.zero,
       leading: Icon(icon, color: AppColors.textSecondary),
       title: Text(title, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14), maxLines: 1, overflow: TextOverflow.ellipsis),
-      subtitle: Text(subtitle, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary), maxLines: 1, overflow: TextOverflow.ellipsis),
+      subtitle: Text(subtitle, style: TextStyle(fontSize: 11, color: AppColors.textSecondary), maxLines: 1, overflow: TextOverflow.ellipsis),
       trailing: const Icon(Icons.chevron_right_rounded, size: 18),
       onTap: onTap,
     );
@@ -352,19 +352,19 @@ class DashboardScreen extends ConsumerWidget {
         borderRadius: BorderRadius.circular(16),
         gradient: LinearGradient(
           colors: [
-            AppColors.slateCard.withOpacity(0.8),
-            AppColors.slateCard.withOpacity(0.4),
+            AppColors.slateCard.withValues(alpha: 0.8),
+            AppColors.slateCard.withValues(alpha: 0.4),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         border: Border.all(
-          color: AppColors.warningAmber.withOpacity(0.25),
+          color: AppColors.warningAmber.withValues(alpha: 0.25),
           width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.warningAmber.withOpacity(0.02),
+            color: AppColors.warningAmber.withValues(alpha: 0.02),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -379,7 +379,7 @@ class DashboardScreen extends ConsumerWidget {
             child: Icon(
               Icons.vpn_key_rounded,
               size: 110,
-              color: AppColors.warningAmber.withOpacity(0.04),
+              color: AppColors.warningAmber.withValues(alpha: 0.04),
             ),
           ),
           Padding(
@@ -390,9 +390,9 @@ class DashboardScreen extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppColors.warningAmber.withOpacity(0.12),
+                    color: AppColors.warningAmber.withValues(alpha: 0.12),
                     shape: BoxShape.circle,
-                    border: Border.all(color: AppColors.warningAmber.withOpacity(0.25)),
+                    border: Border.all(color: AppColors.warningAmber.withValues(alpha: 0.25)),
                   ),
                   child: const Icon(
                     Icons.warning_amber_rounded,
@@ -407,7 +407,7 @@ class DashboardScreen extends ConsumerWidget {
                     children: [
                       Text(
                         '$providerName API Required',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 15,
                           color: AppColors.textPrimary,
@@ -417,7 +417,7 @@ class DashboardScreen extends ConsumerWidget {
                       const SizedBox(height: 6),
                       Text(
                         'To unlock professional AI features, including secure resume parsing and ATS optimizations, configure your $providerName API key. AI operations will remain inactive until configured.',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12.5,
                           color: AppColors.textSecondary,
                           height: 1.4,

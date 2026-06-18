@@ -5,6 +5,7 @@ import 'ui/app_shell.dart';
 import 'ui/splash_screen.dart';
 import 'providers/provider_manager.dart';
 import 'theme/prism_theme.dart';
+import 'ui/app_colors.dart';
 
 final _router = GoRouter(
   initialLocation: '/splash',
@@ -32,22 +33,33 @@ class AIWorkspaceApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeModeProvider);
     final fontScale = ref.watch(fontScaleProvider);
-    final themePalette = ref.watch(themePaletteProvider);
+    // Watching prismTheme triggers AppColors sync (isDark, currentPalette, glassTileStyle)
+    ref.watch(prismThemeProvider);
 
-  final prismTheme = ref.watch(prismThemeProvider);
+    // Build both light and dark ThemeData so ThemeMode can switch between them
+    final palette = ref.watch(themePaletteProvider);
+    final darkPrism = PrismTheme.fromPalette(palette, true);
+    final lightPrism = PrismTheme.fromPalette(palette, false);
 
-  return MaterialApp.router(
-    title: 'Vyaas AI',
-    theme: prismTheme.toThemeData(),
-    themeMode: themeMode,
-    routerConfig: _router,
-    debugShowCheckedModeBanner: false,
-    builder: (context, child) {
-      return MediaQuery(
-        data: MediaQuery.of(context).copyWith(textScaleFactor: fontScale),
-        child: child!,
-      );
-    },
-  );
+    return MaterialApp.router(
+      title: 'Vyaas AI',
+      theme: lightPrism.toThemeData(),
+      darkTheme: darkPrism.toThemeData(),
+      themeMode: themeMode,
+      routerConfig: _router,
+      debugShowCheckedModeBanner: false,
+      builder: (context, child) {
+        // Synchronize static AppColors state with resolved runtime theme brightness
+        final resolvedBrightness = Theme.of(context).brightness;
+        AppColors.isDark = resolvedBrightness == Brightness.dark;
+        AppColors.currentPalette = ref.read(themePaletteProvider);
+        AppColors.glassTileStyle = ref.read(glassTileStyleProvider);
+        
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(fontScale)),
+          child: child!,
+        );
+      },
+    );
   }
 }

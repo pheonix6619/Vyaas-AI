@@ -1,6 +1,7 @@
 // lib/theme/prism_theme.dart
 import 'package:flutter/material.dart';
 import '../ui/theme_palette.dart';
+import '../ui/app_colors.dart';
 
 class PrismTheme {
   final bool isDark;
@@ -64,8 +65,8 @@ class PrismTheme {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           );
-          glassBase = const Color(0xFF090B11).withOpacity(0.12);
-          glassBorder = const Color(0xFFCBD5E0).withOpacity(0.3);
+          glassBase = const Color(0xFF090B11).withValues(alpha: 0.12);
+          glassBorder = const Color(0xFFCBD5E0).withValues(alpha: 0.3);
           textPrimary = const Color(0xFFF3F4F6);
           textSecondary = const Color(0xFF9CA3AF);
         } else {
@@ -76,8 +77,8 @@ class PrismTheme {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           );
-          glassBase = Colors.white.withOpacity(0.15);
-          glassBorder = Colors.white.withOpacity(0.5);
+          glassBase = Colors.white.withValues(alpha: 0.15);
+          glassBorder = Colors.black.withValues(alpha: 0.08);
           textPrimary = const Color(0xFF0A0F1C);
           textSecondary = const Color(0xFF4A5568);
         }
@@ -96,8 +97,8 @@ class PrismTheme {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           );
-          glassBase = const Color(0xFF090B11).withOpacity(0.12);
-          glassBorder = const Color(0xFFCBD5E0).withOpacity(0.3);
+          glassBase = const Color(0xFF090B11).withValues(alpha: 0.12);
+          glassBorder = const Color(0xFFCBD5E0).withValues(alpha: 0.3);
           textPrimary = const Color(0xFFF3F4F6);
           textSecondary = const Color(0xFF9CA3AF);
         } else {
@@ -108,8 +109,8 @@ class PrismTheme {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           );
-          glassBase = Colors.white.withOpacity(0.15);
-          glassBorder = Colors.white.withOpacity(0.5);
+          glassBase = Colors.white.withValues(alpha: 0.15);
+          glassBorder = Colors.black.withValues(alpha: 0.08);
           textPrimary = const Color(0xFF0A0F1C);
           textSecondary = const Color(0xFF4A5568);
         }
@@ -128,8 +129,8 @@ class PrismTheme {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           );
-          glassBase = const Color(0xFF090B11).withOpacity(0.12);
-          glassBorder = const Color(0xFFCBD5E0).withOpacity(0.3);
+          glassBase = const Color(0xFF090B11).withValues(alpha: 0.12);
+          glassBorder = const Color(0xFFCBD5E0).withValues(alpha: 0.3);
           textPrimary = const Color(0xFFF3F4F6);
           textSecondary = const Color(0xFF9CA3AF);
         } else {
@@ -140,8 +141,8 @@ class PrismTheme {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           );
-          glassBase = Colors.white.withOpacity(0.15);
-          glassBorder = Colors.white.withOpacity(0.5);
+          glassBase = Colors.white.withValues(alpha: 0.15);
+          glassBorder = Colors.black.withValues(alpha: 0.08);
           textPrimary = const Color(0xFF0A0F1C);
           textSecondary = const Color(0xFF4A5568);
         }
@@ -160,8 +161,8 @@ class PrismTheme {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           );
-          glassBase = const Color(0xFF090B11).withOpacity(0.12);
-          glassBorder = const Color(0xFFCBD5E0).withOpacity(0.3);
+          glassBase = const Color(0xFF090B11).withValues(alpha: 0.12);
+          glassBorder = const Color(0xFFCBD5E0).withValues(alpha: 0.3);
           textPrimary = const Color(0xFFF3F4F6);
           textSecondary = const Color(0xFF9CA3AF);
         } else {
@@ -172,14 +173,13 @@ class PrismTheme {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           );
-          glassBase = Colors.white.withOpacity(0.15);
-          glassBorder = Colors.white.withOpacity(0.5);
+          glassBase = Colors.white.withValues(alpha: 0.15);
+          glassBorder = Colors.black.withValues(alpha: 0.08);
           textPrimary = const Color(0xFF0A0F1C);
           textSecondary = const Color(0xFF4A5568);
         }
         break;
       case ThemePalette.midnightNavy:
-      default:
         // Midnight Navy palette (default)
         accentIndigo = const Color(0xFF2563EB);
         accentAmber = const Color(0xFFFFA030);
@@ -193,8 +193,8 @@ class PrismTheme {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           );
-          glassBase = const Color(0xFF090B11).withOpacity(0.12);
-          glassBorder = const Color(0xFFCBD5E0).withOpacity(0.3);
+          glassBase = const Color(0xFF090B11).withValues(alpha: 0.12);
+          glassBorder = const Color(0xFFCBD5E0).withValues(alpha: 0.3);
           textPrimary = const Color(0xFFF3F4F6);
           textSecondary = const Color(0xFF9CA3AF);
         } else {
@@ -205,8 +205,8 @@ class PrismTheme {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           );
-          glassBase = Colors.white.withOpacity(0.15);
-          glassBorder = Colors.white.withOpacity(0.5);
+          glassBase = Colors.white.withValues(alpha: 0.15);
+          glassBorder = Colors.black.withValues(alpha: 0.08);
           textPrimary = const Color(0xFF0A0F1C);
           textSecondary = const Color(0xFF4A5568);
         }
@@ -232,15 +232,83 @@ class PrismTheme {
   ThemeData toThemeData() {
     return ThemeData(
       brightness: isDark ? Brightness.dark : Brightness.light,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: accentIndigo,
-        brightness: isDark ? Brightness.dark : Brightness.light,
-        primary: accentIndigo,
-        secondary: accentAmber,
+      scaffoldBackgroundColor: AppColors.obsidianBackground,
+      primaryColor: AppColors.accentIndigo,
+      colorScheme: isDark
+          ? ColorScheme.dark(
+              primary: AppColors.accentIndigo,
+              secondary: AppColors.accentPurple,
+              surface: AppColors.slateCard,
+              error: AppColors.errorRed,
+            )
+          : ColorScheme.light(
+              primary: AppColors.accentIndigo,
+              secondary: AppColors.accentPurple,
+              surface: AppColors.slateCard,
+              error: AppColors.errorRed,
+            ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: isDark ? Colors.white.withValues(alpha: 0.02) : Colors.black.withValues(alpha: 0.03),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: AppColors.borderTransparent),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: AppColors.borderTransparent),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: AppColors.accentIndigo, width: 1.5),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.errorRed),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.errorRed, width: 1.5),
+        ),
+        labelStyle: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+        hintStyle: TextStyle(color: AppColors.textSecondary, fontSize: 13),
       ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          foregroundColor: AppColors.currentPalette == ThemePalette.nordicForest ? Colors.black : Colors.white,
+          textStyle: const TextStyle(
+            fontFamily: 'Inter',
+            fontWeight: FontWeight.bold,
+            fontSize: 13,
+          ),
+        ),
+      ),
+      appBarTheme: AppBarTheme(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        titleTextStyle: TextStyle(
+          fontFamily: 'Outfit',
+          fontWeight: FontWeight.bold,
+          fontSize: 20,
+          color: AppColors.textPrimary,
+        ),
+        iconTheme: IconThemeData(color: AppColors.textPrimary),
+      ),
+      fontFamily: 'Inter',
       textTheme: TextTheme(
-        bodyLarge: TextStyle(color: textPrimary),
-        bodyMedium: TextStyle(color: textSecondary),
+        headlineMedium: TextStyle(
+          fontFamily: 'Outfit',
+          fontWeight: FontWeight.w600,
+          color: AppColors.textPrimary,
+        ),
+        titleMedium: TextStyle(
+          fontFamily: 'Outfit',
+          fontWeight: FontWeight.w500,
+          color: AppColors.textPrimary,
+        ),
+        bodyLarge: TextStyle(color: AppColors.textPrimary),
+        bodyMedium: TextStyle(color: AppColors.textSecondary),
       ),
     );
   }
@@ -249,7 +317,7 @@ class PrismTheme {
 // PrismTheme extension for BuildContext
 extension PrismThemeX on BuildContext {
   PrismTheme get prismTheme {
-    final brightness = Theme.of(this).brightness;
-    return brightness == Brightness.dark ? PrismTheme.dark() : PrismTheme.light();
+    final isDark = Theme.of(this).brightness == Brightness.dark;
+    return PrismTheme.fromPalette(AppColors.currentPalette, isDark);
   }
 }

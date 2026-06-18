@@ -319,7 +319,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Settings & Providers')),
       body: ListView(
-        padding: const EdgeInsets.all(24.0),
+        padding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 100.0),
         children: [
           // Providers Section
           Text('AI Provider Credentials', style: theme.textTheme.titleMedium),
@@ -418,7 +418,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
                   ),
                 ),
-                const Divider(color: AppColors.borderTransparent),
+                Divider(color: AppColors.borderTransparent),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.style_outlined),
@@ -461,7 +461,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
                   ),
                 ),
-                const Divider(color: AppColors.borderTransparent),
+                Divider(color: AppColors.borderTransparent),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -485,6 +485,70 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
                   ],
                 ),
+                Divider(color: AppColors.borderTransparent),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.blur_on_outlined),
+                  title: const Text('Glass Tile Style'),
+                  trailing: SizedBox(
+                    width: 150,
+                    child: DropdownButton<GlassTileStyle>(
+                      value: ref.watch(glassTileStyleProvider),
+                      isExpanded: true,
+                      underline: Container(),
+                      onChanged: (val) {
+                        if (val != null) {
+                          ref.read(glassTileStyleProvider.notifier).setStyle(val);
+                        }
+                      },
+                      items: const [
+                        DropdownMenuItem<GlassTileStyle>(
+                          value: GlassTileStyle.defaultTheme,
+                          child: Text('Default Theme'),
+                        ),
+                        DropdownMenuItem<GlassTileStyle>(
+                          value: GlassTileStyle.accent,
+                          child: Text('Accent Color'),
+                        ),
+                        DropdownMenuItem<GlassTileStyle>(
+                          value: GlassTileStyle.palette,
+                          child: Text('Palette Color'),
+                        ),
+                        DropdownMenuItem<GlassTileStyle>(
+                          value: GlassTileStyle.neutral,
+                          child: Text('Neutral'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Divider(color: AppColors.borderTransparent),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Glass Opacity'),
+                        Text(
+                          '${(ref.watch(glassOpacityProvider) * 100).toInt()}%',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                    Slider(
+                      value: ref.watch(glassOpacityProvider),
+                      min: 0.0,
+                      max: 1.0,
+                      divisions: 20,
+                      activeColor: AppColors.accentIndigo,
+                      inactiveColor: AppColors.borderTransparent,
+                      onChanged: (val) {
+                        ref.read(glassOpacityProvider.notifier).setOpacity(val);
+                      },
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
@@ -504,7 +568,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: _exportBackup,
                 ),
-                const Divider(color: AppColors.borderTransparent),
+                Divider(color: AppColors.borderTransparent),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.settings_backup_restore_rounded),
@@ -513,7 +577,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: _importBackup,
                 ),
-                const Divider(color: AppColors.borderTransparent),
+                Divider(color: AppColors.borderTransparent),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.delete_forever_outlined, color: AppColors.errorRed),
@@ -608,7 +672,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(name, style: const TextStyle(fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis),
-                    Text(subtitle, style: const TextStyle(color: AppColors.textSecondary, fontSize: 11), overflow: TextOverflow.ellipsis),
+                    Text(subtitle, style: TextStyle(color: AppColors.textSecondary, fontSize: 11), overflow: TextOverflow.ellipsis),
                   ],
                 ),
               ),

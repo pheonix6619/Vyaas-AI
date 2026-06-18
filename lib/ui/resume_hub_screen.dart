@@ -12,7 +12,6 @@ import '../providers/provider_manager.dart';
 import '../models/resume.dart';
 import '../services/resume_ai_service.dart';
 import '../database/providers.dart';
-import '../utils/pdf_font_scaler.dart';
 
 class ResumeHubScreen extends ConsumerStatefulWidget {
   const ResumeHubScreen({super.key});
@@ -44,6 +43,9 @@ class _ResumeHubScreenState extends ConsumerState<ResumeHubScreen> with SingleTi
   String _suggestions = 'Suggestions will appear here after optimization.';
   String _selectedFont = 'Times New Roman';
   bool _onePageRule = false;
+  double _headerFontSize = 18.0;
+  double _sectionHeadingFontSize = 12.0;
+  double _bodyFontSize = 9.0;
 
   // Local state buffers for Resume Form to ensure confirm-before-save
   List<WorkExperience> _localExperiences = [];
@@ -95,6 +97,33 @@ class _ResumeHubScreenState extends ConsumerState<ResumeHubScreen> with SingleTi
     _localAchievements = [...resume.achievements ?? []];
     
     _isInitialized = true;
+    if (resume.id != null) {
+      _loadTypographySettings(resume.id!);
+    }
+  }
+
+  Future<void> _loadTypographySettings(int id) async {
+    try {
+      final headerStr = await secureStorage.read(key: 'resume_${id}_font_scale_header');
+      final headingStr = await secureStorage.read(key: 'resume_${id}_font_scale_heading');
+      final bodyStr = await secureStorage.read(key: 'resume_${id}_font_scale_body');
+      
+      if (mounted) {
+        setState(() {
+          _headerFontSize = double.tryParse(headerStr ?? '') ?? 18.0;
+          _sectionHeadingFontSize = double.tryParse(headingStr ?? '') ?? 12.0;
+          _bodyFontSize = double.tryParse(bodyStr ?? '') ?? 9.0;
+        });
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _saveTypographySettings(int id) async {
+    try {
+      await secureStorage.write(key: 'resume_${id}_font_scale_header', value: _headerFontSize.toString());
+      await secureStorage.write(key: 'resume_${id}_font_scale_heading', value: _sectionHeadingFontSize.toString());
+      await secureStorage.write(key: 'resume_${id}_font_scale_body', value: _bodyFontSize.toString());
+    } catch (_) {}
   }
 
   Future<void> _loadSectionOrder() async {
@@ -533,7 +562,7 @@ $text
           ),
           childrenPadding: const EdgeInsets.all(16.0),
           children: [
-            const Text(
+            Text(
               'Paste the full text of your existing resume. Vyaas AI will analyze it to automatically extract and populate all the form fields below.',
               style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
             ),
@@ -647,13 +676,13 @@ $text
   }) {
     if (!onePageRule) {
       return {
-        'heading': 11.0,
-        'subHeading': 9.5,
-        'body': 9.0,
-        'small': 8.5,
-        'tiny': 8.0,
-        'skillCategory': 9.0,
-        'skillItem': 8.0,
+        'heading': _sectionHeadingFontSize,
+        'subHeading': _bodyFontSize + 1.0,
+        'body': _bodyFontSize,
+        'small': _bodyFontSize - 0.5,
+        'tiny': _bodyFontSize - 1.0,
+        'skillCategory': _bodyFontSize,
+        'skillItem': _bodyFontSize - 1.0,
       };
     }
 
@@ -722,13 +751,13 @@ $text
     
     if (estimatedLines <= maxLinesPerPage) {
       return {
-        'heading': 11.0,
-        'subHeading': 9.5,
-        'body': 9.0,
-        'small': 8.5,
-        'tiny': 8.0,
-        'skillCategory': 9.0,
-        'skillItem': 8.0,
+        'heading': _sectionHeadingFontSize,
+        'subHeading': _bodyFontSize + 1.0,
+        'body': _bodyFontSize,
+        'small': _bodyFontSize - 0.5,
+        'tiny': _bodyFontSize - 1.0,
+        'skillCategory': _bodyFontSize,
+        'skillItem': _bodyFontSize - 1.0,
       };
     }
     
@@ -737,17 +766,17 @@ $text
     
     // Apply scaling with minimum limits
     double scale(double base) {
-      return (base * scaleFactor).clamp(8.0, 11.0);
+      return (base * scaleFactor).clamp(6.0, 18.0);
     }
     
     return {
-      'heading': scale(11.0),
-      'subHeading': scale(9.5),
-      'body': scale(9.0),
-      'small': scale(8.5),
-      'tiny': scale(8.0),
-      'skillCategory': scale(9.0),
-      'skillItem': scale(8.0),
+      'heading': scale(_sectionHeadingFontSize),
+      'subHeading': scale(_bodyFontSize + 1.0),
+      'body': scale(_bodyFontSize),
+      'small': scale(_bodyFontSize - 0.5),
+      'tiny': scale(_bodyFontSize - 1.0),
+      'skillCategory': scale(_bodyFontSize),
+      'skillItem': scale(_bodyFontSize - 1.0),
     };
   }
 
@@ -1247,9 +1276,17 @@ $text
               child: pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
-                  pw.Text(cleanName, style: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold)),
+                  pw.Text(
+                    cleanName,
+                    style: pw.TextStyle(
+                      fontSize: _onePageRule 
+                          ? (_headerFontSize * (fontSizes['heading']! / _sectionHeadingFontSize)).clamp(12.0, 26.0)
+                          : _headerFontSize,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                  ),
                   if (cleanTitle.isNotEmpty)
-                    pw.Text(cleanTitle, style: pw.TextStyle(fontSize: 11, color: PdfColors.grey700)),
+                    pw.Text(cleanTitle, style: pw.TextStyle(fontSize: fontSizes['subHeading']!, color: PdfColors.grey700)),
                   if (contactWidgetsWithSeparators.isNotEmpty)
                     pw.Wrap(
                       spacing: 2,
@@ -1586,7 +1623,7 @@ $text
             ],
           ),
           const SizedBox(height: 12),
-          const Text(
+          Text(
             'Drag items or use arrows to change the layout sequence in the form & PDF:',
             style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
           ),
@@ -1610,7 +1647,7 @@ $text
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: Row(
                   children: [
-                    const Icon(Icons.drag_handle_rounded, color: AppColors.textSecondary),
+                    Icon(Icons.drag_handle_rounded, color: AppColors.textSecondary),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
@@ -1709,7 +1746,7 @@ $text
     }
 
     return ListView(
-      padding: const EdgeInsets.all(24.0),
+      padding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 120.0),
       children: [
         Text('Fill out your resume information locally:', style: TextStyle(color: AppColors.textSecondary)),
         const SizedBox(height: 16),
@@ -1831,8 +1868,8 @@ $text
   List<Widget> _buildLocalExperiencesList() {
     if (_localExperiences.isEmpty) {
       return [
-        const Padding(
-          padding: EdgeInsets.symmetric(vertical: 8.0),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Text('No experience items added.', style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
         )
       ];
@@ -1843,7 +1880,7 @@ $text
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.03),
+          color: Colors.white.withValues(alpha: 0.03),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
@@ -1854,7 +1891,7 @@ $text
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('${exp.company} - ${exp.title}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                  Text(exp.duration, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                  Text(exp.duration, style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                   const SizedBox(height: 4),
                   Text(exp.description, style: const TextStyle(fontSize: 12)),
                 ],
@@ -1921,8 +1958,8 @@ $text
   List<Widget> _buildLocalEducationList() {
     if (_localEducation.isEmpty) {
       return [
-        const Padding(
-          padding: EdgeInsets.symmetric(vertical: 8.0),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Text('No education items added.', style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
         )
       ];
@@ -1933,7 +1970,7 @@ $text
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.03),
+          color: Colors.white.withValues(alpha: 0.03),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
@@ -2087,8 +2124,8 @@ $text
   List<Widget> _buildLocalSkillCategories() {
     if (_localSkills.isEmpty) {
       return [
-        const Padding(
-          padding: EdgeInsets.symmetric(vertical: 8.0),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Text('No skill categories added.', style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
         )
       ];
@@ -2375,8 +2412,8 @@ $text
   List<Widget> _buildLocalProjectsList() {
     if (_localProjects.isEmpty) {
       return [
-        const Padding(
-          padding: EdgeInsets.symmetric(vertical: 8.0),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Text('No project items added.', style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
         )
       ];
@@ -2400,7 +2437,7 @@ $text
                   Text(p.title, style: const TextStyle(fontWeight: FontWeight.bold)),
                   if (p.url != null && p.url!.isNotEmpty)
                     Text(p.url!, style: TextStyle(fontSize: 11, color: AppColors.accentIndigo)),
-                  Text(p.year, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                  Text(p.year, style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                   const SizedBox(height: 4),
                   Text(p.description, style: const TextStyle(fontSize: 12)),
                 ],
@@ -2511,8 +2548,8 @@ $text
   List<Widget> _buildLocalCertificationsList() {
     if (_localCertifications.isEmpty) {
       return [
-        const Padding(
-          padding: EdgeInsets.symmetric(vertical: 8.0),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Text('No certification items added.', style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
         )
       ];
@@ -2537,7 +2574,7 @@ $text
                   Text(c.issuer, style: const TextStyle(fontSize: 12)),
                   if (c.url != null && c.url!.isNotEmpty)
                     Text(c.url!, style: TextStyle(fontSize: 11, color: AppColors.accentIndigo)),
-                  Text(c.year, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                  Text(c.year, style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                 ],
               ),
             ),
@@ -2646,8 +2683,8 @@ $text
   List<Widget> _buildLocalAchievementsList() {
     if (_localAchievements.isEmpty) {
       return [
-        const Padding(
-          padding: EdgeInsets.symmetric(vertical: 8.0),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Text('No achievements added.', style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
         )
       ];
@@ -2713,7 +2750,7 @@ $text
 
   Widget _buildOptimizerTab() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(24.0),
+      padding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 120.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -2776,7 +2813,7 @@ $text
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: AppColors.accentIndigo.withOpacity(0.2),
+                        color: AppColors.accentIndigo.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text('ATS Score: $_atsScore%', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
@@ -2788,7 +2825,7 @@ $text
                   spacing: 8,
                   children: _missingKeywords.map((tag) => Chip(label: Text(tag))).toList(),
                 ),
-                const Divider(color: AppColors.borderTransparent, height: 24),
+                Divider(color: AppColors.borderTransparent, height: 24),
                 const Text('AI Suggestions:', style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
                 Text(_suggestions, style: const TextStyle(fontSize: 12, height: 1.4)),
@@ -2846,6 +2883,22 @@ $text
       )
     );
 
+    // Calculate dynamic font sizes
+    final fontSizes = _calculateFontSizes(
+      onePageRule: _onePageRule,
+      experiences: experiences,
+      education: education,
+      projects: projects,
+      certs: certs,
+      achievements: achievements,
+      filteredSkills: filteredSkills,
+      hasObjective: activeResume.aiObjective != null && activeResume.aiObjective!.trim().isNotEmpty,
+    );
+
+    final nameFontSize = _onePageRule 
+        ? (_headerFontSize * (fontSizes['heading']! / _sectionHeadingFontSize)).clamp(12.0, 26.0)
+        : _headerFontSize;
+
     TextStyle previewTextStyle({double? fontSize, FontWeight? fontWeight, Color? color, bool highlight = false}) {
       return TextStyle(
         fontFamily: _selectedFont,
@@ -2863,16 +2916,16 @@ $text
         if (activeResume.aiObjective != null && activeResume.aiObjective!.trim().isNotEmpty) {
           final isObjectiveChanged = _showOptimized && _optimizedResume != null && activeResume.aiObjective != resume.aiObjective;
           previewBody.addAll([
-            Text('OBJECTIVE', style: previewTextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+            Text('OBJECTIVE', style: previewTextStyle(fontWeight: FontWeight.bold, fontSize: fontSizes['heading'])),
             const Divider(color: Colors.black12, height: 8),
-            Text(activeResume.aiObjective!.trim(), style: previewTextStyle(fontSize: 10, color: Colors.black87, highlight: isObjectiveChanged), textAlign: TextAlign.justify),
+            Text(activeResume.aiObjective!.trim(), style: previewTextStyle(fontSize: fontSizes['body'], color: Colors.black87, highlight: isObjectiveChanged), textAlign: TextAlign.justify),
             const SizedBox(height: 12),
           ]);
         }
       } else if (section == 'skills') {
         if (filteredSkills.isNotEmpty) {
           previewBody.addAll([
-            Text('SKILLS', style: previewTextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+            Text('SKILLS', style: previewTextStyle(fontWeight: FontWeight.bold, fontSize: fontSizes['heading'])),
             const Divider(color: Colors.black12, height: 8),
             ...filteredSkills.entries.map((entry) {
               final originalCategorySkills = resume.skills[entry.key]?.map((s) => s.trim().toLowerCase()).toList() ?? [];
@@ -2883,11 +2936,11 @@ $text
                 skillSpans.add(
                   TextSpan(
                     text: v,
-                    style: previewTextStyle(fontSize: 9, color: Colors.black87, highlight: isNewSkill),
+                    style: previewTextStyle(fontSize: fontSizes['skillItem'], color: Colors.black87, highlight: isNewSkill),
                   ),
                 );
                 if (i < entry.value.length - 1) {
-                  skillSpans.add(TextSpan(text: ', ', style: previewTextStyle(fontSize: 9)));
+                  skillSpans.add(TextSpan(text: ', ', style: previewTextStyle(fontSize: fontSizes['skillItem'])));
                 }
               }
 
@@ -2896,13 +2949,13 @@ $text
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('• ', style: previewTextStyle(fontWeight: FontWeight.bold, fontSize: 10)),
+                    Text('• ', style: previewTextStyle(fontWeight: FontWeight.bold, fontSize: fontSizes['subHeading'])),
                     Expanded(
                       child: Text.rich(
                         TextSpan(
                           children: [
-                            TextSpan(text: entry.key.trim(), style: previewTextStyle(fontWeight: FontWeight.bold, fontSize: 9)),
-                            TextSpan(text: ' : ', style: previewTextStyle(fontSize: 9)),
+                            TextSpan(text: entry.key.trim(), style: previewTextStyle(fontWeight: FontWeight.bold, fontSize: fontSizes['skillCategory'])),
+                            TextSpan(text: ' : ', style: previewTextStyle(fontSize: fontSizes['skillCategory'])),
                             ...skillSpans,
                           ],
                         ),
@@ -2918,7 +2971,7 @@ $text
       } else if (section == 'experience') {
         if (experiences.isNotEmpty) {
           previewBody.addAll([
-            Text('WORK EXPERIENCE', style: previewTextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+            Text('WORK EXPERIENCE', style: previewTextStyle(fontWeight: FontWeight.bold, fontSize: fontSizes['heading'])),
             const Divider(color: Colors.black12, height: 8),
             ...experiences.asMap().entries.map((entry) {
               final idx = entry.key;
@@ -2944,14 +2997,14 @@ $text
                                 if (exp.company.trim().isNotEmpty)
                                   TextSpan(
                                     text: exp.company.trim(),
-                                    style: previewTextStyle(fontWeight: FontWeight.bold, fontSize: 10, highlight: isCompanyChanged),
+                                    style: previewTextStyle(fontWeight: FontWeight.bold, fontSize: fontSizes['subHeading'], highlight: isCompanyChanged),
                                   ),
                                 if (exp.company.trim().isNotEmpty && exp.title.trim().isNotEmpty)
-                                  TextSpan(text: ' - ', style: previewTextStyle(fontWeight: FontWeight.bold, fontSize: 10)),
+                                  TextSpan(text: ' - ', style: previewTextStyle(fontWeight: FontWeight.bold, fontSize: fontSizes['subHeading'])),
                                 if (exp.title.trim().isNotEmpty)
                                   TextSpan(
                                     text: exp.title.trim(),
-                                    style: previewTextStyle(fontWeight: FontWeight.bold, fontSize: 10, highlight: isTitleChanged),
+                                    style: previewTextStyle(fontWeight: FontWeight.bold, fontSize: fontSizes['subHeading'], highlight: isTitleChanged),
                                   ),
                               ],
                             ),
@@ -2960,11 +3013,11 @@ $text
                         ),
                         const SizedBox(width: 8),
                         if (exp.duration.trim().isNotEmpty)
-                          Text(exp.duration.trim(), style: previewTextStyle(fontSize: 9, color: Colors.grey[700])),
+                          Text(exp.duration.trim(), style: previewTextStyle(fontSize: fontSizes['small'], color: Colors.grey[700])),
                       ],
                     ),
                     if (exp.description.trim().isNotEmpty)
-                      Text(exp.description.trim(), style: previewTextStyle(fontSize: 9, color: Colors.black87, highlight: isDescChanged), textAlign: TextAlign.justify),
+                      Text(exp.description.trim(), style: previewTextStyle(fontSize: fontSizes['small'], color: Colors.black87, highlight: isDescChanged), textAlign: TextAlign.justify),
                   ],
                 ),
               );
@@ -2975,7 +3028,7 @@ $text
       } else if (section == 'education') {
         if (education.isNotEmpty) {
           previewBody.addAll([
-            Text('EDUCATION', style: previewTextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+            Text('EDUCATION', style: previewTextStyle(fontWeight: FontWeight.bold, fontSize: fontSizes['heading'])),
             const Divider(color: Colors.black12, height: 8),
             ...education.map((edu) {
               return Padding(
@@ -2990,13 +3043,13 @@ $text
                           if (edu.school.trim().isNotEmpty)
                             Text(
                               edu.school.trim(),
-                              style: previewTextStyle(fontWeight: FontWeight.bold, fontSize: 10),
+                              style: previewTextStyle(fontWeight: FontWeight.bold, fontSize: fontSizes['subHeading']),
                               overflow: TextOverflow.ellipsis,
                             ),
                           if (edu.degree.trim().isNotEmpty)
                             Text(
                               edu.degree.trim(),
-                              style: previewTextStyle(fontSize: 9, color: Colors.grey[700]),
+                              style: previewTextStyle(fontSize: fontSizes['small'], color: Colors.grey[700]),
                               overflow: TextOverflow.ellipsis,
                             ),
                         ],
@@ -3004,7 +3057,7 @@ $text
                     ),
                     const SizedBox(width: 8),
                     if (edu.duration.trim().isNotEmpty)
-                      Text(edu.duration.trim(), style: previewTextStyle(fontSize: 9, color: Colors.grey[700])),
+                      Text(edu.duration.trim(), style: previewTextStyle(fontSize: fontSizes['small'], color: Colors.grey[700])),
                   ],
                 ),
               );
@@ -3015,7 +3068,7 @@ $text
       } else if (section == 'projects') {
         if (projects.isNotEmpty) {
           previewBody.addAll([
-            Text('PROJECTS', style: previewTextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+            Text('PROJECTS', style: previewTextStyle(fontWeight: FontWeight.bold, fontSize: fontSizes['heading'])),
             const Divider(color: Colors.black12, height: 8),
             ...projects.asMap().entries.map((entry) {
               final idx = entry.key;
@@ -3039,10 +3092,10 @@ $text
                               children: [
                                 TextSpan(
                                   text: p.title.trim(),
-                                  style: previewTextStyle(fontWeight: FontWeight.bold, fontSize: 10, highlight: isTitleChanged),
+                                  style: previewTextStyle(fontWeight: FontWeight.bold, fontSize: fontSizes['subHeading'], highlight: isTitleChanged),
                                 ),
                                 if (p.url != null && p.url!.trim().isNotEmpty)
-                                  TextSpan(text: ' (${p.url!.trim()})', style: previewTextStyle(fontSize: 10)),
+                                  TextSpan(text: ' (${p.url!.trim()})', style: previewTextStyle(fontSize: fontSizes['small'])),
                               ],
                             ),
                             overflow: TextOverflow.ellipsis,
@@ -3050,11 +3103,11 @@ $text
                         ),
                         const SizedBox(width: 8),
                         if (p.year.trim().isNotEmpty)
-                          Text(p.year.trim(), style: previewTextStyle(fontSize: 9, color: Colors.grey[700])),
+                          Text(p.year.trim(), style: previewTextStyle(fontSize: fontSizes['small'], color: Colors.grey[700])),
                       ],
                     ),
                     if (p.description.trim().isNotEmpty)
-                      Text(p.description.trim(), style: previewTextStyle(fontSize: 9, color: Colors.black87, highlight: isDescChanged), textAlign: TextAlign.justify),
+                      Text(p.description.trim(), style: previewTextStyle(fontSize: fontSizes['small'], color: Colors.black87, highlight: isDescChanged), textAlign: TextAlign.justify),
                   ],
                 ),
               );
@@ -3065,7 +3118,7 @@ $text
       } else if (section == 'certifications') {
         if (certs.isNotEmpty) {
           previewBody.addAll([
-            Text('CERTIFICATIONS', style: previewTextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+            Text('CERTIFICATIONS', style: previewTextStyle(fontWeight: FontWeight.bold, fontSize: fontSizes['heading'])),
             const Divider(color: Colors.black12, height: 8),
             ...certs.map((c) {
               final issuerParts = [
@@ -3085,13 +3138,13 @@ $text
                           if (c.name.trim().isNotEmpty)
                             Text(
                               c.name.trim(),
-                              style: previewTextStyle(fontWeight: FontWeight.bold, fontSize: 10),
+                              style: previewTextStyle(fontWeight: FontWeight.bold, fontSize: fontSizes['subHeading']),
                               overflow: TextOverflow.ellipsis,
                             ),
                           if (issuerText.isNotEmpty)
                             Text(
                               issuerText,
-                              style: previewTextStyle(fontSize: 9, color: Colors.grey[700]),
+                              style: previewTextStyle(fontSize: fontSizes['small'], color: Colors.grey[700]),
                               overflow: TextOverflow.ellipsis,
                             ),
                         ],
@@ -3099,7 +3152,7 @@ $text
                     ),
                     const SizedBox(width: 8),
                     if (c.year.trim().isNotEmpty)
-                      Text(c.year.trim(), style: previewTextStyle(fontSize: 9, color: Colors.grey[700])),
+                      Text(c.year.trim(), style: previewTextStyle(fontSize: fontSizes['small'], color: Colors.grey[700])),
                   ],
                 ),
               );
@@ -3110,7 +3163,7 @@ $text
       } else if (section == 'achievements') {
         if (achievements.isNotEmpty) {
           previewBody.addAll([
-            Text('ACHIEVEMENTS', style: previewTextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+            Text('ACHIEVEMENTS', style: previewTextStyle(fontWeight: FontWeight.bold, fontSize: fontSizes['heading'])),
             const Divider(color: Colors.black12, height: 8),
             ...achievements.asMap().entries.map((entry) {
               final idx = entry.key;
@@ -3123,9 +3176,9 @@ $text
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('• ', style: previewTextStyle(fontWeight: FontWeight.bold, fontSize: 10)),
+                    Text('• ', style: previewTextStyle(fontWeight: FontWeight.bold, fontSize: fontSizes['subHeading'])),
                     Expanded(
-                      child: Text(a.trim(), style: previewTextStyle(fontSize: 9, color: Colors.black87, highlight: isAchChanged), textAlign: TextAlign.justify),
+                      child: Text(a.trim(), style: previewTextStyle(fontSize: fontSizes['small'], color: Colors.black87, highlight: isAchChanged), textAlign: TextAlign.justify),
                     ),
                   ],
                 ),
@@ -3160,7 +3213,7 @@ $text
     final contactInfo = contactInfoList.join('  |  ');
 
     return Padding(
-      padding: const EdgeInsets.all(24.0),
+      padding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 120.0),
       child: Column(
         children: [
           Wrap(
@@ -3187,6 +3240,12 @@ $text
                         });
                       }
                     },
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    icon: Icon(Icons.text_fields, size: 18, color: AppColors.accentIndigo),
+                    tooltip: 'Typography Settings',
+                    onPressed: () => _showTypographySettingsModal(resume.id!),
                   ),
                 ],
               ),
@@ -3244,7 +3303,7 @@ $text
                                 _showOptimized = val;
                               });
                             },
-                            activeColor: AppColors.accentIndigo,
+                            activeThumbColor: AppColors.accentIndigo,
                           ),
                         ],
                       ),
@@ -3354,18 +3413,18 @@ $text
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(activeResume.fullName, style: previewTextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                    Text(activeResume.fullName, style: previewTextStyle(fontWeight: FontWeight.bold, fontSize: nameFontSize)),
                     if (activeResume.title != null && activeResume.title!.trim().isNotEmpty)
                       Text(
                         activeResume.title!.trim(),
                         style: previewTextStyle(
-                          fontSize: 12,
+                          fontSize: fontSizes['subHeading'],
                           color: Colors.black87,
                           highlight: _showOptimized && _optimizedResume != null && activeResume.title != resume.title,
                         ),
                       ),
                     if (contactInfo.isNotEmpty)
-                      Text(contactInfo, style: previewTextStyle(fontSize: 10, color: Colors.black54)),
+                      Text(contactInfo, style: previewTextStyle(fontSize: fontSizes['small'], color: Colors.black54)),
                     const Divider(color: Colors.black12, height: 16),
                     ...previewBody,
                   ],
@@ -3390,6 +3449,123 @@ $text
           ),
         ],
       ),
+    );
+  }
+
+  void _showTypographySettingsModal(int resumeId) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.slateCard,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setModalState) {
+            return Container(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Typography Settings',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.close, color: AppColors.textSecondary),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    
+                    // Name (Header) Size slider
+                    Text(
+                      'Header (Name) Size: ${_headerFontSize.toStringAsFixed(1)} pt',
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
+                    ),
+                    Slider(
+                      value: _headerFontSize,
+                      min: 14.0,
+                      max: 26.0,
+                      divisions: 12,
+                      activeColor: AppColors.accentIndigo,
+                      inactiveColor: AppColors.borderTransparent,
+                      onChanged: (val) {
+                        setModalState(() {
+                          _headerFontSize = val;
+                        });
+                        setState(() {
+                          _headerFontSize = val;
+                        });
+                        _saveTypographySettings(resumeId);
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    
+                    // Headings Size slider
+                    Text(
+                      'Section Headings Size: ${_sectionHeadingFontSize.toStringAsFixed(1)} pt',
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
+                    ),
+                    Slider(
+                      value: _sectionHeadingFontSize,
+                      min: 10.0,
+                      max: 18.0,
+                      divisions: 8,
+                      activeColor: AppColors.accentIndigo,
+                      inactiveColor: AppColors.borderTransparent,
+                      onChanged: (val) {
+                        setModalState(() {
+                          _sectionHeadingFontSize = val;
+                        });
+                        setState(() {
+                          _sectionHeadingFontSize = val;
+                        });
+                        _saveTypographySettings(resumeId);
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    
+                    // Body Size slider
+                    Text(
+                      'Body Content Size: ${_bodyFontSize.toStringAsFixed(1)} pt',
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
+                    ),
+                    Slider(
+                      value: _bodyFontSize,
+                      min: 7.0,
+                      max: 12.0,
+                      divisions: 10,
+                      activeColor: AppColors.accentIndigo,
+                      inactiveColor: AppColors.borderTransparent,
+                      onChanged: (val) {
+                        setModalState(() {
+                          _bodyFontSize = val;
+                        });
+                        setState(() {
+                          _bodyFontSize = val;
+                        });
+                        _saveTypographySettings(resumeId);
+                      },
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 

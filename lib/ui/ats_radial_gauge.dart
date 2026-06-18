@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'app_colors.dart';
-import 'spacing.dart';
 
 class AtsRadialGauge extends StatelessWidget {
   final double score;
@@ -36,14 +35,14 @@ class AtsRadialGauge extends StatelessWidget {
               if (title != null)
                 Text(
                   title!,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 11,
                     color: AppColors.textSecondary,
                   ),
                 ),
               Text(
                 '${score.round()}%',
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Outfit',
                   fontWeight: FontWeight.bold,
                   fontSize: 32,

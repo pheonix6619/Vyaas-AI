@@ -126,50 +126,53 @@ Please write a polished, complete, and contextually rich draft. Do not return an
 
     return Scaffold(
       appBar: AppBar(title: const Text('Template Hub')),
-      body: Row(
-        children: [
-          // Sidebar categories
-          NavigationRail(
-            selectedIndex: _templates.keys.toList().indexOf(_selectedCategory),
-            onDestinationSelected: (index) {
-              setState(() {
-                _selectedCategory = _templates.keys.toList()[index];
-                _selectedTemplate = null;
-                _generatedDraft = '';
-                _recipientController.clear();
-                _contextController.clear();
-                _toneController.clear();
-              });
-            },
-            labelType: NavigationRailLabelType.all,
-            backgroundColor: AppColors.slateCard.withOpacity(0.3),
-            destinations: const [
-              NavigationRailDestination(
-                icon: Icon(Icons.business_center_outlined),
-                selectedIcon: Icon(Icons.business_center),
-                label: Text('Career'),
-              ),
-              NavigationRailDestination(
-                icon: Icon(Icons.alternate_email_rounded),
-                selectedIcon: Icon(Icons.contact_mail_rounded),
-                label: Text('Comm'),
-              ),
-              NavigationRailDestination(
-                icon: Icon(Icons.menu_book_rounded),
-                selectedIcon: Icon(Icons.book),
-                label: Text('Study'),
-              ),
-            ],
-          ),
-          const VerticalDivider(width: 1, color: AppColors.borderTransparent),
-          
-          // Template selector & editing pane
-          Expanded(
-            child: _selectedTemplate == null 
-              ? _buildTemplateGrid(theme)
-              : _buildTemplateForm(theme),
-          ),
-        ],
+      body: Padding(
+        padding: const EdgeInsets.only(bottom: 100.0),
+        child: Row(
+          children: [
+            // Sidebar categories
+            NavigationRail(
+              selectedIndex: _templates.keys.toList().indexOf(_selectedCategory),
+              onDestinationSelected: (index) {
+                setState(() {
+                  _selectedCategory = _templates.keys.toList()[index];
+                  _selectedTemplate = null;
+                  _generatedDraft = '';
+                  _recipientController.clear();
+                  _contextController.clear();
+                  _toneController.clear();
+                });
+              },
+              labelType: NavigationRailLabelType.all,
+              backgroundColor: AppColors.slateCard.withValues(alpha: 0.3),
+              destinations: const [
+                NavigationRailDestination(
+                  icon: Icon(Icons.business_center_outlined),
+                  selectedIcon: Icon(Icons.business_center),
+                  label: Text('Career'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.alternate_email_rounded),
+                  selectedIcon: Icon(Icons.contact_mail_rounded),
+                  label: Text('Comm'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.menu_book_rounded),
+                  selectedIcon: Icon(Icons.book),
+                  label: Text('Study'),
+                ),
+              ],
+            ),
+            VerticalDivider(width: 1, color: AppColors.borderTransparent),
+            
+            // Template selector & editing pane
+            Expanded(
+              child: _selectedTemplate == null 
+                ? _buildTemplateGrid(theme)
+                : _buildTemplateForm(theme),
+            ),
+          ],
+        ),
       ),
     );
   }

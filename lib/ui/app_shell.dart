@@ -213,7 +213,7 @@ class _AppShellState extends ConsumerState<AppShell> {
                                     ],
                                   ),
                                   const SizedBox(height: 8),
-                                  Divider(color: theme.glassBorder.withOpacity(0.2), height: 1),
+                                  Divider(color: theme.glassBorder.withValues(alpha: 0.2), height: 1),
                                   const SizedBox(height: 6),
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -328,9 +328,9 @@ class _AppShellState extends ConsumerState<AppShell> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
           decoration: BoxDecoration(
-            color: selected ? theme.accentIndigo.withOpacity(0.12) : Colors.transparent,
+            color: selected ? theme.accentIndigo.withValues(alpha: 0.12) : Colors.transparent,
             borderRadius: BorderRadius.circular(10),
-            border: selected ? Border.all(color: theme.accentIndigo.withOpacity(0.25)) : null,
+            border: selected ? Border.all(color: theme.accentIndigo.withValues(alpha: 0.25)) : null,
           ),
           child: Row(
             children: [
@@ -370,7 +370,7 @@ class _AppShellState extends ConsumerState<AppShell> {
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
           decoration: BoxDecoration(
             color: isSettingsTabSelected && !_isSettingsExpanded 
-                ? theme.accentIndigo.withOpacity(0.08) 
+                ? theme.accentIndigo.withValues(alpha: 0.08) 
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(10),
           ),
@@ -421,9 +421,9 @@ class _AppShellState extends ConsumerState<AppShell> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
           decoration: BoxDecoration(
-            color: selected ? theme.accentIndigo.withOpacity(0.12) : Colors.transparent,
+            color: selected ? theme.accentIndigo.withValues(alpha: 0.12) : Colors.transparent,
             borderRadius: BorderRadius.circular(8),
-            border: selected ? Border.all(color: theme.accentIndigo.withOpacity(0.2)) : null,
+            border: selected ? Border.all(color: theme.accentIndigo.withValues(alpha: 0.2)) : null,
           ),
           child: Row(
             children: [

@@ -66,7 +66,7 @@ class _SchedulerScreenState extends ConsumerState<SchedulerScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Token Scheduler Dashboard')),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
+        padding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 100.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -113,9 +113,9 @@ class _SchedulerScreenState extends ConsumerState<SchedulerScreen> {
             jobsAsync.when(
               data: (jobs) {
                 if (jobs.isEmpty) {
-                  return const GlassCard(
+                  return GlassCard(
                     child: Padding(
-                      padding: EdgeInsets.all(24.0),
+                      padding: const EdgeInsets.all(24.0),
                       child: Center(
                         child: Text(
                           'No background jobs queued.',
@@ -132,7 +132,7 @@ class _SchedulerScreenState extends ConsumerState<SchedulerScreen> {
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: jobs.length,
-                    separatorBuilder: (context, index) => const Divider(
+                    separatorBuilder: (context, index) => Divider(
                       color: AppColors.borderTransparent,
                       height: 1,
                     ),
@@ -188,7 +188,7 @@ class _SchedulerScreenState extends ConsumerState<SchedulerScreen> {
             ],
           ),
           const SizedBox(height: 16),
-          Text(details, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+          Text(details, style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
         ],
       ),
     );
@@ -215,9 +215,9 @@ class _SchedulerScreenState extends ConsumerState<SchedulerScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: priorityColor.withOpacity(0.15),
+                      color: priorityColor.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: priorityColor.withOpacity(0.3)),
+                      border: Border.all(color: priorityColor.withValues(alpha: 0.3)),
                     ),
                     child: Text(
                       priority,
@@ -313,7 +313,7 @@ class _SchedulerScreenState extends ConsumerState<SchedulerScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Priority', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                        Text('Priority', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                         const SizedBox(height: 4),
                         DropdownButton<int>(
                           value: selectedPriority,
@@ -334,7 +334,7 @@ class _SchedulerScreenState extends ConsumerState<SchedulerScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Task Type', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                        Text('Task Type', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                         const SizedBox(height: 4),
                         DropdownButton<String>(
                           value: selectedType,

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/provider_manager.dart';
 import 'theme.dart';
 
 class VyaasLogo extends StatelessWidget {
@@ -83,14 +85,14 @@ class _AnimatedLogoState extends State<_AnimatedLogo> with SingleTickerProviderS
   }
 }
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMixin {
+class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProviderStateMixin {
   late AnimationController _logoController;
   late AnimationController _textController;
   late Animation<double> _logoScale;
@@ -156,6 +158,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(prismThemeProvider);
     return Scaffold(
       backgroundColor: AppColors.obsidianBackground,
       body: Center(
@@ -184,7 +187,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                   opacity: _textOpacity.value,
                   child: Column(
                     children: [
-                      const Text(
+                      Text(
                         'Vyaas AI',
                         style: TextStyle(
                           fontFamily: 'Outfit',

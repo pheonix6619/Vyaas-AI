@@ -2,8 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart';
 import 'app_database.dart';
 import 'providers.dart';
-import '../repositories/chat_repository.dart';
-import '../repositories/resume_repository.dart';
 import '../models/resume.dart';
 
 /// Stream of all chats.

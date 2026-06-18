@@ -192,18 +192,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       appBar: AppBar(
         title: const Text('AI Chat Assistant'),
         actions: [
-          Row(
-            children: [
-              const Text('Deep Think', style: TextStyle(fontSize: 12)),
-              const SizedBox(width: 4),
-              Switch(
-                value: _deepThinkEnabled,
-                activeColor: AppColors.accentIndigo,
-                onChanged: (val) => setState(() => _deepThinkEnabled = val),
-              ),
-            ],
-          ),
-          const SizedBox(width: 16),
           // Session management menu
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert, color: Colors.white),
@@ -228,20 +216,22 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       body: AnimatedOpacity(
         opacity: _contentVisible ? 1.0 : 0.0,
         duration: const Duration(milliseconds: 200),
-        child: Column(
-        children: [
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: 100.0),
+          child: Column(
+            children: [
           // Sub-header controls bar (Static Read-Only Model Info)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: AppColors.slateCard.withOpacity(0.4),
-              border: const Border(
+              color: AppColors.slateCard.withValues(alpha: 0.4),
+              border: Border(
                 bottom: BorderSide(color: AppColors.borderTransparent),
               ),
             ),
             child: Row(
               children: [
-                const Icon(Icons.psychology_outlined, size: 16, color: AppColors.textSecondary),
+                Icon(Icons.psychology_outlined, size: 16, color: AppColors.textSecondary),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Consumer(
@@ -250,7 +240,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       return Text(
                         provider.activeModel,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
                           color: AppColors.textPrimary,
@@ -314,7 +304,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 final itemCount = messages.length + (showTyping ? 1 : 0);
 
                 if (itemCount == 0) {
-                  return const Center(
+                  return Center(
                     child: Text(
                       'No messages yet. Send a prompt to start.',
                       style: TextStyle(color: AppColors.textSecondary),
@@ -336,8 +326,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     
                     final align = msg.isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start;
                     final bubbleColor = msg.isUser
-                        ? AppColors.accentIndigo.withOpacity(0.25)
-                        : AppColors.slateCard.withOpacity(0.6);
+                        ? AppColors.accentIndigo.withValues(alpha: 0.25)
+                        : AppColors.slateCard.withValues(alpha: 0.6);
                     
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 6.0),
@@ -363,7 +353,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                               text: TextSpan(
                                 children: _parseMarkdown(
                                   msg.content,
-                                  const TextStyle(fontSize: 13, height: 1.4, color: AppColors.textPrimary),
+                                  TextStyle(fontSize: 13, height: 1.4, color: AppColors.textPrimary),
                                 ),
                               ),
                             ),
@@ -383,7 +373,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                       ),
                                     );
                                   },
-                                  child: const Icon(Icons.copy_rounded, size: 14, color: AppColors.textSecondary),
+                                  child: Icon(Icons.copy_rounded, size: 14, color: AppColors.textSecondary),
                                 ),
                               ],
                             ),
@@ -400,7 +390,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           ),
           
           // Input block
-          const Divider(height: 1, color: AppColors.borderTransparent),
+          Divider(height: 1, color: AppColors.borderTransparent),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
             child: Row(
@@ -408,11 +398,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
-                      color: AppColors.slateCard.withOpacity(0.5),
+                      color: AppColors.slateCard.withValues(alpha: 0.5),
                       borderRadius: BorderRadius.circular(24.0),
                       border: Border.all(
                         color: _deepThinkEnabled 
-                            ? AppColors.accentPurple.withOpacity(0.5) 
+                            ? AppColors.accentPurple.withValues(alpha: 0.5) 
                             : AppColors.borderTransparent
                       ),
                     ),
@@ -421,9 +411,16 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       controller: _controller,
                       enabled: !isThinking,
                       style: const TextStyle(fontSize: 14),
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         hintText: 'Type a message securely...',
                         border: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        disabledBorder: InputBorder.none,
+                        errorBorder: InputBorder.none,
+                        focusedErrorBorder: InputBorder.none,
+                        filled: false,
+                        contentPadding: const EdgeInsets.symmetric(vertical: 12.0),
                         hintStyle: TextStyle(color: AppColors.textSecondary),
                       ),
                       onSubmitted: (_) => _sendMessage(),
@@ -448,6 +445,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             ),
           ),
         ],
+      ),
       ),
       ),
     );
@@ -502,7 +500,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
             decoration: BoxDecoration(
-              color: AppColors.slateCard.withOpacity(0.6),
+              color: AppColors.slateCard.withValues(alpha: 0.6),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(16),
                 topRight: Radius.circular(16),
@@ -568,7 +566,7 @@ class _TypingIndicatorState extends State<TypingIndicator> with SingleTickerProv
                   width: 6,
                   height: 6,
                   decoration: BoxDecoration(
-                    color: AppColors.accentIndigo.withOpacity(0.8),
+                    color: AppColors.accentIndigo.withValues(alpha: 0.8),
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -681,7 +679,7 @@ class _ChatControlDrawerState extends ConsumerState<_ChatControlDrawer> {
             // Drawer Header Branding
             Container(
               padding: const EdgeInsets.all(20.0),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 border: Border(
                   bottom: BorderSide(color: AppColors.borderTransparent),
                 ),
@@ -693,7 +691,7 @@ class _ChatControlDrawerState extends ConsumerState<_ChatControlDrawer> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Vyaas AI',
                         style: TextStyle(
                           fontFamily: 'Outfit',
@@ -707,7 +705,7 @@ class _ChatControlDrawerState extends ConsumerState<_ChatControlDrawer> {
                         style: TextStyle(
                           fontFamily: 'Inter',
                           fontSize: 11,
-                          color: AppColors.textSecondary.withOpacity(0.8),
+                          color: AppColors.textSecondary.withValues(alpha: 0.8),
                         ),
                       ),
                     ],
@@ -757,19 +755,19 @@ class _ChatControlDrawerState extends ConsumerState<_ChatControlDrawer> {
                                   const SizedBox(height: 4),
                                   Text(
                                     '${NumberFormat('#,###').format(quotaLeft)} / ${NumberFormat('#,###').format(maxTokens)} tokens left today.',
-                                    style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                                    style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
                                   ),
                                 ],
                               ),
                             ),
                           ],
                         ),
-                        const Divider(height: 24, color: AppColors.borderTransparent),
+                        Divider(height: 24, color: AppColors.borderTransparent),
                         // Linear usage visualizer
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('Today\'s Usage', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                            Text('Today\'s Usage', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                             Text('${(tokenProgress * 100).toInt()}% Used', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
                           ],
                         ),
@@ -779,7 +777,7 @@ class _ChatControlDrawerState extends ConsumerState<_ChatControlDrawer> {
                           child: LinearProgressIndicator(
                             value: tokenProgress,
                             minHeight: 6,
-                            backgroundColor: Colors.white.withOpacity(0.05),
+                            backgroundColor: Colors.white.withValues(alpha: 0.05),
                             valueColor: AlwaysStoppedAnimation<Color>(AppColors.accentIndigo),
                           ),
                         ),
@@ -796,7 +794,7 @@ class _ChatControlDrawerState extends ConsumerState<_ChatControlDrawer> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Active Provider', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                        Text('Active Provider', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                         DropdownButtonHideUnderline(
                           child: DropdownButton<AIProviderType>(
                             value: activeType,
@@ -814,8 +812,8 @@ class _ChatControlDrawerState extends ConsumerState<_ChatControlDrawer> {
                             ],
                           ),
                         ),
-                        const Divider(color: AppColors.borderTransparent, height: 16),
-                        const Text('Active Model', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                        Divider(color: AppColors.borderTransparent, height: 16),
+                        Text('Active Model', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                         _isLoadingModels
                             ? const Padding(
                                 padding: EdgeInsets.symmetric(vertical: 8.0),
@@ -1098,7 +1096,7 @@ class _RadialProgressPainter extends CustomPainter {
     final radius = math.min(size.width, size.height) / 2 - 4;
 
     final bgPaint = Paint()
-      ..color = Colors.white.withOpacity(0.05)
+      ..color = Colors.white.withValues(alpha: 0.05)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 5;
     canvas.drawCircle(center, radius, bgPaint);

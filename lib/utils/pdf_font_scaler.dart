@@ -1,4 +1,3 @@
-import 'package:pdf/widgets.dart' as pw;
 
 class PdfFontScaler {
   static const double _minFontSize = 8.0;
